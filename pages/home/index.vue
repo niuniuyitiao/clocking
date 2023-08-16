@@ -61,16 +61,16 @@
 		
 		methods: {
 			async cardClickHandler(type) {
-				const params = {
-					'X-Lang': 'en_US',
-					'X-Time-Zone': 'Timezone',
-				};
-				const reuslt = await uni.$u.http.post('/api/user/queryDetail',params, {
-                    header: {
-                        'content-type': 'application/x-www-form-urlencoded'
-                    },
-				});
-				console.log(789, result);
+				// const params = {
+				// 	'X-Lang': 'en_US',
+				// 	'X-Time-Zone': 'Timezone',
+				// };
+				// const reuslt = await uni.$u.http.post('/api/user/queryDetail',params, {
+    //                 header: {
+    //                     'content-type': 'application/x-www-form-urlencoded'
+    //                 },
+				// });
+				// console.log(789, result);
 			}
 		}
 	}
