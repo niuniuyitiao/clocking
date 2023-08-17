@@ -23,6 +23,7 @@
 </template>
 
 <script>
+	import { mapMutations } from 'vuex';
 	export default {
 		data() {
 			return {
@@ -34,10 +35,8 @@
 			};
 		},
 		
-		mounted() {
-		},
-		
 		methods: {
+			...mapMutations(['SET_USER_INFO']),
 			//改变密码的可视状态
 			changeIcon() {
 				this.suffixIcon = this.suffixIcon === 'eye-off' ? 'eye-fill' : 'eye-off'
@@ -56,12 +55,38 @@
 				uni.setStorageSync('accessToken', reuslt.accessToken);
 				uni.setStorageSync('refreshToken', reuslt.refreshToken);
 				console.log(44, reuslt);
+				this.getUserInfo();
+				setTimeout(()=>{
+					this.refreshToken();
+				}, 60000);
 				uni.redirectTo({
 					url:'/pages/home/index',
 					fail(err) {
-							console.log('重定向失败：', err);
-						}
-				})
+						console.log('重定向失败：', err);
+					}
+				});
+
+			},
+			async getUserInfo() {
+				const result = await uni.$u.http.post('/api/user/queryDetail',{}, {
+                    header: {
+                        'content-type': 'application/x-www-form-urlencoded'
+                    },
+				});
+				this.SET_USER_INFO(result);
+				
+				console.log('user', result);
+			},
+
+			async refreshToken() {
+				this.timer = setTimeout(async()=>{
+					const params = {
+						refreshToken: uni.getStorageSync('refreshToken')
+					};
+					const reuslt = await uni.$u.http.post('/api/auth/refreshToken',params);
+					reuslt && uni.setStorageSync('accessToken', reuslt.accessToken);
+					this.refreshToken();
+				}, 28*60*1000);
 			}
 		}
 	}
