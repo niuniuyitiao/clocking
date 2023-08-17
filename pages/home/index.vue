@@ -11,36 +11,42 @@
 		
 		<view class="main">
 			<view class="card" @click="cardClickHandler('clock')">
+				<image class="label-img" src="../../static/home_clock.png"></image>
 				<view class="card-title">
 					{{$t('home.clockInOut')}}
 				</view>
 			</view>
 			
 			<view class="card" @click="cardClickHandler('schedule')">
+				<image class="label-img" src="../../static/home_schedule.png"></image>
 				<view class="card-title">
 					{{$t('home.mySchedule')}}
 				</view>
 			</view>
 			
 			<view class="card" @click="cardClickHandler('leaveApplication')">
+				<image class="label-img" src="../../static/home_leave.png"></image>
 				<view class="card-title">
 					{{$t('home.leaveApplication')}}
 				</view>
 			</view>
 			
 			<view class="card" @click="cardClickHandler('otApplication')">
+				<image class="label-img" src="../../static/home_ot.png"></image>
 				<view class="card-title">
 					{{$t('home.otApplication')}}
 				</view>
 			</view>
 			
 			<view class="card" @click="cardClickHandler('reClock')">
+				<image class="label-img" src="../../static/home_reclock.png"></image>
 				<view class="card-title">
 					{{$t('home.reClock')}}
 				</view>
 			</view>
 			
 			<view class="card" @click="cardClickHandler('approval')">
+				<image class="label-img" src="../../static/home_approval.png"></image>
 				<view class="card-title">
 					{{$t('home.myApproval')}}
 				</view>
@@ -63,7 +69,7 @@
 			async cardClickHandler(type) {
 				const params = {
 					'X-Lang': 'en_US',
-					'X-Time-Zone': 'Timezone',
+					'X-Time-Zone': 'Asia/Shanghai',
 				};
 				const result = await uni.$u.http.post('/api/user/queryDetail',params, {
                     header: {
@@ -110,5 +116,10 @@
 		align-items: center;
 		padding: 30rpx 0;
 		margin: 40rpx 0;
+	}
+	.label-img {
+		width: 120rpx;
+		height: 120rpx;
+		margin-bottom: 30rpx;
 	}
 </style>
