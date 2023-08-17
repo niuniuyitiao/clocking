@@ -20,8 +20,15 @@
 				"navigationStyle": "custom" ,
 				"navigationBarTextStyle": "black"
 			}
+		},
+		{
+			"path": "pages/clock/index",
+			"style": {
+				"navigationStyle": "custom" 
+			}
 		}
-	],
+    
+    ],
 	"subPackages": [{
 		"root": "pages/componentsA",
 		"pages": [

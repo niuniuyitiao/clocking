@@ -65,12 +65,19 @@
 					'X-Lang': 'en_US',
 					'X-Time-Zone': 'Timezone',
 				};
-				const reuslt = await uni.$u.http.post('/api/user/queryDetail',params, {
+				const result = await uni.$u.http.post('/api/user/queryDetail',params, {
                     header: {
                         'content-type': 'application/x-www-form-urlencoded'
                     },
 				});
 				console.log(789, result);
+				uni.navigateTo({
+					// url:`/pages/home/${type}/index`,
+					url: '/pages/clock/index',
+					fail(err) {
+							console.log('重定向失败：', err);
+						}
+				})
 			}
 		}
 	}
