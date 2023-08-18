@@ -1,7 +1,7 @@
 <template>
 	<view class="clock">
 		
-		<!--打卡时间轴-->
+		<!--打卡累计时间-->
 		<view class="top">
 			<div>
 				<p>00</p>
@@ -46,7 +46,7 @@
 					<p><u-icon name="close" @click="changeShow(false)" color="#737373"></u-icon></p>
 				</div>
 				
-				<div class="type-part-one">Suspend</div>
+				<div class="type-part-one" @click="changeShow(false,)">Suspend</div>
 				
 				<div class="type-part-one">Out</div>
 			</u-popup>
@@ -64,19 +64,88 @@
 		data() {
 			return {
 				clockTypeShow: false,
+				clockTypeList: [],
 			};
+		},
+		
+		mounted() {
+			this.getClockTypeList();
 		},
 
 		methods: {
-			//改变
+			async getClockTypeList(){
+				let params = {
+					"flag": 3
+				}
+				const res = await uni.$u.http.post('/api/attendance/type/queryList',params);
+				this.clockTypeList = res;
+				console.log('type',res)
+			},
+			
+			//改变弹窗显隐
 			changeShow(value){
 				this.clockTypeShow = value;
+				this.changeClockStatus()
 			},
 			
 			//点击打卡
 			getClockChange(){
 				console.log(6666);
-				this.clockTypeShow = true;
+				this.clockTypeShow = true
+			},
+			
+			//点击后进行打卡操作
+			changeClockStatus(){
+				//获取手机是否有定位权限
+				this.getLimits();
+			},
+			
+			//获取手机是否有定位权限
+			getLimits(){
+				let that = this;
+				uni.getSystemInfo({
+					success(res) {
+						console.log('res',res);
+						let locationEnabled = res.locationEnabled; //判断手机定位服务是否开启
+						let locationAuthorized = res.locationAuthorized; //判断定位服务是否允许微信授权
+						
+						if(locationEnabled && locationAuthorized){
+							console.log('有权限');
+							uni.authorize({
+							    //授权请求窗口
+							    scope: "scope.userLocation", //授权的类型
+							    success: (res) => {
+							        console.log('222',res);
+									//获取定位信息
+									that.getLoactionInfo();
+							    },
+								fail: (err) => {
+									console.log('err',err)
+								}
+							})	
+						}else{
+							uni.showToast({
+							    title: "请打开手机定位权限",
+							    icon: "none",
+							});
+						}
+					}
+				})
+			},
+			
+			//获取定位信息的经纬度
+			getLoactionInfo(){
+				console.log(1112121)
+				uni.getLocation({
+					type: 'gcj02',
+					altitude: true,
+					geocode: true,
+					maximumAge: 3000,
+					enableHighAccuracy: true,
+					success: function (res) {
+						console.log('location',res)
+					}
+				})
 			}
 		}
 	}
