@@ -17,25 +17,43 @@
 		{
 			"path": "pages/home/index",
 			"style": {
-				"navigationStyle": "custom" ,
+				"navigationStyle": "custom",
 				"navigationBarTextStyle": "black"
 			}
+		}, {
+			"path": "pages/leave-application/leave-application",
+			"style": {
+				"navigationStyle": "custom"
+			}
+
+		}, {
+			"path": "pages/leave-application/create",
+			"style": {
+				"navigationStyle": "custom"
+			}
+
+		}, {
+			"path": "pages/leave-application/detail",
+			"style": {
+				"navigationStyle": "custom"
+			}
+
 		}
 	],
 	"subPackages": [{
 		"root": "pages/componentsA",
 		"pages": [
-		
+
 		]
 	}, {
 		"root": "pages/componentsB",
 		"pages": [
-			
+
 		]
 	}, {
 		"root": "pages/componentsC",
 		"pages": [
-			
+
 		]
 	}],
 	"preloadRule": {

@@ -8,38 +8,38 @@
 				首页
 			</view>
 		</u-navbar>
-		
+
 		<view class="main">
 			<view class="card" @click="cardClickHandler('clock')">
 				<view class="card-title">
 					{{$t('home.clockInOut')}}
 				</view>
 			</view>
-			
+
 			<view class="card" @click="cardClickHandler('schedule')">
 				<view class="card-title">
 					{{$t('home.mySchedule')}}
 				</view>
 			</view>
-			
+
 			<view class="card" @click="cardClickHandler('leaveApplication')">
 				<view class="card-title">
 					{{$t('home.leaveApplication')}}
 				</view>
 			</view>
-			
+
 			<view class="card" @click="cardClickHandler('otApplication')">
 				<view class="card-title">
 					{{$t('home.otApplication')}}
 				</view>
 			</view>
-			
+
 			<view class="card" @click="cardClickHandler('reClock')">
 				<view class="card-title">
 					{{$t('home.reClock')}}
 				</view>
 			</view>
-			
+
 			<view class="card" @click="cardClickHandler('approval')">
 				<view class="card-title">
 					{{$t('home.myApproval')}}
@@ -52,23 +52,31 @@
 <script>
 	export default {
 		data() {
-			return {
-			};
+			return {};
 		},
-		
-		mounted() {
-		},
-		
+
+		mounted() {},
+
 		methods: {
 			async cardClickHandler(type) {
+				const urlMap = {
+					'leaveApplication': '/pages/leave-application/leave-application'
+				}
+				const url = urlMap[type]
+				console.log(url, 'url--')
+				uni.navigateTo({
+					url,
+
+				})
+
 				// const params = {
 				// 	'X-Lang': 'en_US',
 				// 	'X-Time-Zone': 'Timezone',
 				// };
 				// const reuslt = await uni.$u.http.post('/api/user/queryDetail',params, {
-    //                 header: {
-    //                     'content-type': 'application/x-www-form-urlencoded'
-    //                 },
+				//                 header: {
+				//                     'content-type': 'application/x-www-form-urlencoded'
+				//                 },
 				// });
 				// console.log(789, result);
 			}
@@ -81,10 +89,12 @@
 		width: 70rpx;
 		height: 70rpx;
 	}
+
 	.title-text {
 		font-weight: bold;
 		font-size: 36rpx;
 	}
+
 	.main {
 		display: flex;
 		flex-wrap: wrap;
@@ -92,6 +102,7 @@
 		padding: 30rpx 50rpx;
 		padding-top: 180rpx;
 	}
+
 	.card {
 		width: 300rpx;
 		height: 200rpx;
