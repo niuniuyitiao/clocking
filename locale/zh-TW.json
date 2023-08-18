@@ -1,9 +1,11 @@
 {
-	"home.title": "首页",
-	"home.clockInOut": "打卡",
-	"home.mySchedule": "排班",
-	"home.leaveApplication": "休假申請",
+	"home.title": "Attendance",
+	"home.clockInOut": "Clock In / Out",
+	"home.mySchedule": "My Schedule",
+	"home.leaveApplication": "Leave Application",
 	"home.otApplication": "OT Application",
-	"home.reClock": "補簽申請",
-	"home.myApproval": "審批"
+	"home.reClock": "Re-Clock Application",
+	"home.myApproval": "My Approval",
+	"home.manualClock1": "Manual Clock",
+	"home.manualClock2": "Application"
 }

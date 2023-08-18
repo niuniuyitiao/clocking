@@ -5,5 +5,7 @@
 	"home.leaveApplication": "Leave Application",
 	"home.otApplication": "OT Application",
 	"home.reClock": "Re-Clock Application",
-	"home.myApproval": "My Approval"
+	"home.myApproval": "My Approval",
+	"home.manualClock1": "Manual Clock",
+	"home.manualClock2": "Application"
 }

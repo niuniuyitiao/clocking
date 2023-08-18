@@ -7,6 +7,9 @@
 			<view slot="center" class="title-text">
 				{{$t('home.title')}}
 			</view>
+			<view slot="right">
+				<image class="saomiao-logo" src="../../static/saomiao.png"></image>
+			</view>
 		</u-navbar>
 		
 		<view class="main">
@@ -42,6 +45,16 @@
 				<image class="label-img" src="../../static/home_reclock.png"></image>
 				<view class="card-title">
 					{{$t('home.reClock')}}
+				</view>
+			</view>
+			
+			<view class="card" @click="cardClickHandler('manual')">
+				<image class="label-img" src="../../static/home_manual.png"></image>
+				<view class="card-title">
+					{{$t('home.manualClock1')}}
+				</view>
+				<view class="card-title">
+					{{$t('home.manualClock2')}}
 				</view>
 			</view>
 			
@@ -98,6 +111,10 @@
 		width: 70rpx;
 		height: 70rpx;
 	}
+	.saomiao-logo {
+		width: 50rpx;
+		height: 50rpx;
+	}
 	.title-text {
 		font-weight: bold;
 		font-size: 36rpx;
@@ -111,19 +128,21 @@
 	}
 	.card {
 		width: 300rpx;
-		height: 200rpx;
+		height: 280rpx;
 		border-radius: 10rpx;
 		box-shadow: 0rpx 0rpx 15rpx 5rpx #eeeeee;
 		font-size: 28rpx;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		padding: 30rpx 0;
+		padding: 30rpx 10rpx;
 		margin: 40rpx 0;
+		box-sizing: border-box;
 	}
 	.label-img {
 		width: 120rpx;
 		height: 120rpx;
 		margin-bottom: 30rpx;
+		flex-shrink: 0;
 	}
 </style>
