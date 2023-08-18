@@ -1,8 +1,9 @@
 {
-  "home.clockInOut": "Clock In / Out",
-  "home.mySchedule": "My Schedule",
-  "home.leaveApplication": "Leave Application",
-  "home.otApplication": "OT Application",
-  "home.reClock": "Re-Clock Application",
-  "home.myApproval": "My Approval"
+	"home.title": "Attendance",
+	"home.clockInOut": "Clock In / Out",
+	"home.mySchedule": "My Schedule",
+	"home.leaveApplication": "Leave Application",
+	"home.otApplication": "OT Application",
+	"home.reClock": "Re-Clock Application",
+	"home.myApproval": "My Approval"
 }

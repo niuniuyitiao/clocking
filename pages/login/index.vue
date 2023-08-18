@@ -37,12 +37,14 @@
 		
 		methods: {
 			...mapMutations(['SET_USER_INFO']),
+
 			//改变密码的可视状态
 			changeIcon() {
 				this.suffixIcon = this.suffixIcon === 'eye-off' ? 'eye-fill' : 'eye-off'
 				this.inputType = this.inputType === 'password' ? 'text' : 'password';
 				this.$forceUpdate();
 			},
+
 			async loginHandler() {
 				const params = {
 					loginType: 2,
@@ -52,13 +54,13 @@
 				const reuslt = await uni.$u.http.post('/api/auth/login',params, {
 					dataType: 'json'
 				});
+
 				uni.setStorageSync('accessToken', reuslt.accessToken);
 				uni.setStorageSync('refreshToken', reuslt.refreshToken);
-				console.log(44, reuslt);
+
 				this.getUserInfo();
-				setTimeout(()=>{
-					this.refreshToken();
-				}, 60000);
+				this.refreshToken();
+
 				uni.redirectTo({
 					url:'/pages/home/index',
 					fail(err) {
@@ -67,6 +69,7 @@
 				});
 
 			},
+
 			async getUserInfo() {
 				const result = await uni.$u.http.post('/api/user/queryDetail',{}, {
                     header: {
@@ -74,7 +77,6 @@
                     },
 				});
 				this.SET_USER_INFO(result);
-				
 				console.log('user', result);
 			},
 

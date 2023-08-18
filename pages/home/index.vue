@@ -5,7 +5,7 @@
 				<image class="title-logo" src="../../static/login_logo.png"></image>
 			</view>
 			<view slot="center" class="title-text">
-				首页
+				{{$t('home.title')}}
 			</view>
 		</u-navbar>
 		
@@ -56,6 +56,7 @@
 </template>
 
 <script>
+	import { mapMutations, mapState } from 'vuex';
 	export default {
 		data() {
 			return {
@@ -63,9 +64,19 @@
 		},
 		
 		mounted() {
+			this.getTimezone();
 		},
-		
+		computed: {
+			...mapState(['$timezoneOffset']),
+		},
 		methods: {
+			...mapMutations(['SET_TIMEZONE_LIST']),
+			async getTimezone() {
+				const result = await uni.$u.http.get('/api/timezone/list');
+				this.SET_TIMEZONE_LIST(result);
+				console.log('timezone', result);
+				console.log('otimeffset', this.$timezoneOffset)
+			},
 			async cardClickHandler(type) {
 				const params = {
 					'X-Lang': 'en_US',

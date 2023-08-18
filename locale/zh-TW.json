@@ -1,8 +1,9 @@
 {
-  "home.clockInOut": "打卡",
-  "home.mySchedule": "排班",
-  "home.leaveApplication": "休假申請",
-  "home.otApplication": "OT Application",
-  "home.reClock": "補簽申請",
-  "home.myApproval": "審批"
+	"home.title": "首页",
+	"home.clockInOut": "打卡",
+	"home.mySchedule": "排班",
+	"home.leaveApplication": "休假申請",
+	"home.otApplication": "OT Application",
+	"home.reClock": "補簽申請",
+	"home.myApproval": "審批"
 }
