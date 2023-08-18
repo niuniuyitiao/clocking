@@ -94,16 +94,21 @@
 				console.log('otimeffset', this.$timezoneOffset)
 			},
 			async cardClickHandler(type) {
-				const urlMap = {
-					'leaveApplication': '/pages/leave-application/leave-application'
+				if (type === 'leaveApplication') {
+					const urlMap = {
+						'leaveApplication': '/pages/leave-application/leave-application'
+					}
+					const url = urlMap[type]
+					console.log(url, 'url--')
+					uni.navigateTo({
+						url,
+					})	
+				} else {
+					uni.showToast({
+						title: '功能待开放',
+						icon: 'none'
+					});
 				}
-				const url = urlMap[type]
-				console.log(url, 'url--')
-				uni.navigateTo({
-					url,
-
-				})
-
 			}
 		}
 	}
