@@ -1,121 +1,369 @@
 <template>
 	<view class="clock">
+		<u-navbar :is-back="false"  height="40" bg-color="#fafafa">
+			<view class="navbar-left" slot="left" style="display: flex;align-items: center;font-size: 28rpx;" @click="changePage">
+				<u-icon name="arrow-left" ></u-icon>
+				Back
+			</view>
+			<view slot="center" class="title-text" style="font-size: 36rpx;">
+				Clock
+			</view>
+			<!-- <view slot="right">
+			</view> -->
+		</u-navbar>
 		
-		<!--打卡累计时间-->
-		<view class="top">
-			<div>
-				<p>00</p>
-				<p class="desc">hours</p>
-			</div>
-			<div>
-				<p class="symbol">00</p>
-				<p class="desc">Minutes</p>
-			</div>
-			<div>
-				<p>00</p>
-				<p class="desc">Seconds</p>
-			</div>
-		</view>
-		
-		<!--打卡时间轴-->
-		<view class="time-line">
-			<u-time-line >
-					
-				<u-time-line-item bg-color='#ccdbea'>
-					<template v-slot:content>
-						<view class="u-order-desc">Clock in: 2023-07-19 12:25:41</view>							
-					</template>
-				</u-time-line-item>
-					
-				<u-time-line-item bg-color='#ccdbea'>
-					<template v-slot:content>							
-						<view class="u-order-desc">Clock in: 2023-07-19 12:25:41</view>							
-					</template>
-				</u-time-line-item>
-			</u-time-line>
-			
-		</view>
-		
-		<!--打卡按钮-->
-		<view class="clock-content"  @click="getClockChange()">
-			<span>Clock In</span>
-			
-			<u-popup mode="center" :show="clockTypeShow" :closeOnClickOverlay="false">
-				<div class="popup-header">
-					<p>Clock Out</p>
-					<p><u-icon name="close" @click="changeShow(false)" color="#737373"></u-icon></p>
-				</div>
+		<view class="clock-content-box">
+			<view class="clock-content-part">
+				<!--打卡累计时间-->
+				<view class="top">
+					<div>
+						<p>{{clockTime.hour}}</p>
+						<p class="desc">hours</p>
+					</div>
+					<div>
+						<p class="symbol">{{clockTime.minutes}}</p>
+						<p class="desc">Minutes</p>
+					</div>
+					<div>
+						<p>{{clockTime.seconds}}</p>
+						<p class="desc">Seconds</p>
+					</div>
+				</view>
 				
-				<div class="type-part-one" @click="changeShow(false,)">Suspend</div>
+				<!--打卡时间轴-->
+				<view class="time-line">
+					<u-time-line >
+						
+						<u-time-line-item bg-color='#ccdbea' v-for="item in todayClock.list" :key="item.id">
+							<template v-slot:content>
+								<view class="u-order-desc">{{clockTypeList.filter(ele=>ele.id===item.clockType)[0].remark}}: {{moment(item.clockTime).format('YYYY-MM-DD HH:mm:ss')}}</view>							
+							</template>
+						</u-time-line-item>
+							
+						
+					</u-time-line>
+					
+				</view>
 				
-				<div class="type-part-one">Out</div>
-			</u-popup>
-		</view>
-		
-		<!--补卡按钮-->
-		<view class="clock-re">
-			<span>Re-Clock</span>
+				<!--打卡按钮-->
+				<view v-if="clockType!=='结束'" class="clock-content"  @click="getClockChange()">
+					<span v-if="clockType==='签入'">Clock In</span
+					<span v-if="clockType==='暂停'">Resume</span>
+					<span v-if="clockType==='签出' || clockType==='继续'">Clock Out</span>
+					
+					<u-popup mode="center" :show="clockTypeShow" :closeOnClickOverlay="false">
+						<div class="popup-header">
+							<p>Clock Out</p>
+							<p><u-icon name="close" @click="changeShow(false)" color="#737373"></u-icon></p>
+						</div>
+						
+						<div class="type-part-one" @click="changeShow(false,'暂停')">Suspend</div>
+						
+						<div class="type-part-one" @click="changeShow(false,'签出')">Out</div>
+					</u-popup>
+				</view>
+				
+				<!--补卡按钮-->
+				<view class="clock-re">
+					<span>Re-Clock</span>
+				</view>
+				
+				<!--提示弹窗-->
+				<u-popup mode="center" :show="toastShow">
+					<div class="popup-header">
+						<p v-if="toastType==='success'"><u-icon name="checkmark-circle-fill"  color="#38be6b"></u-icon></p>
+						<p v-if="toastType==='warning'"><u-icon name="info-circle-fill"  color="#41b6e6"></u-icon></p>
+						<p><u-icon name="close" @click="changeToastShow(false)" color="#737373"></u-icon></p>
+					</div>
+					
+					<div class="toast-content">
+						<p class="toast-title">{{toastTitle}}</p>
+						<p class="toast-text" @click="changeToastShow(false)" v-if="toastContent && toastContent!==''">{{toastContent}}</p>
+					</div>
+				</u-popup>
+				
+				<!--签出二次确认弹窗-->
+				<u-popup mode="center" :show="clockOutShow">
+					<div class="popup-header">
+						<p ><u-icon name="info-circle-fill"  color="#41b6e6"></u-icon></p>
+						<p><u-icon name="close" @click="changeClockShow(false)" color="#737373"></u-icon></p>
+					</div>
+					
+					<div class="toast-content">
+						<p class="toast-title">Are you sure</p>
+						<p class="toast-title" @click="changeClockShow(false)">you want to clock out?</p>
+					</div>
+					<div class="toast-button">
+						<u-button type="primary" @click="changeClockShow(false)" style="border-radius: 40rpx;background-color: #d9f0fa;border-color: #d9f0fa;color:black"  text="Cancel"></u-button>
+						<u-button type="primary" @click="changeClockShow(false,'confirm')" style="margin-left: 20rpx;border-radius: 40rpx;"  text="Confirm"></u-button>
+					</div>
+				</u-popup>
+				
+				<!--补签弹窗-->
+				<!-- <u-popup mode="center" :show="">
+					<div class="popup-header">
+						<p >Re-Clock</p>
+						<p><u-icon name="close" color="#737373"></u-icon></p>
+					</div>
+					
+					<div class="re-clock-content">
+						<u-form class="form">
+							<u-form-item labelWidth="auto" label="" required >
+								
+							</u-form-item>
+							<u-form-item labelWidth="auto" label="" @click="showAtdTypeId=true" required>
+								
+							
+							<u-form-item labelWidth="auto" label="" required>
+								<u-textarea  placeholder="Comments"></u-textarea>
+							</u-form-item>
+							<div>
+								<u-button type="primary"  style="border-radius: 40rpx;background-color: #d9f0fa;border-color: #d9f0fa;color:black"  text="Cancel"></u-button>
+								<u-button type="primary"  style="margin-left: 20rpx;border-radius: 40rpx;"  text="Confirm"></u-button>
+							</div>
+						</u-form>
+					</div>
+				</u-popup> -->
+			</view>
 		</view>
 	</view>
 </template>
 
 <script>
+	import { mapState } from 'vuex';
+	import moment from 'moment'
 	export default {
 		data() {
 			return {
-				clockTypeShow: false,
-				clockTypeList: [],
+				clockTypeShow: false,  //签出的弹窗选择暂停和签出
+				clockTypeList: [],  //打卡类型列表
+				todayClock: {},  //今日打卡记录
+				clockType: '',  //打卡状态
+				clockInfo: '',  //打卡类型信息
+				latitude: 0,  //纬度
+				longitude: 0,  //经度
+				storeIndo: {},
+				toastShow: false,  //提示弹框
+				toastTitle: '', //提示标题
+				toastContent: '', //提示内容
+				toastType: '', //提示类型success成功warning警示
+				clockTime: {
+					hour: '00',
+					minutes: '00',
+					seconds: '00',
+				},   //时间
+				timer: null,
+				clockOutShow: false, //签出二次确认弹框
 			};
 		},
 		
+		computed: {
+			...mapState(['$userInfo','$timezoneOffset'])
+		},
+		
+		beforeDestroy() {
+		    if (this.timer) {
+		      clearInterval(this.timer); // 在Vue实例销毁前，清除时间定时器
+		    }
+		},
+		
+		
 		mounted() {
-			this.getClockTypeList();
+			//获取打卡类型列表和今日打卡
+			this.getClockTypeList().then(()=>{
+				this.getTodayClock();
+			})
+			
+			// this.getStoreInfo();
 		},
 
 		methods: {
+			moment,
+			
+			//切换页面
+			changePage(){
+				uni.navigateTo({
+					url: '/pages/home/index',
+					fail(err) {
+						console.log('重定向失败：', err);
+					}
+				})
+			},
+			
+			//获取打卡类型列表
 			async getClockTypeList(){
+				console.log(666,this.$userInfo,moment().format(""));
 				let params = {
 					"flag": 3
 				}
 				const res = await uni.$u.http.post('/api/attendance/type/queryList',params);
 				this.clockTypeList = res;
-				console.log('type',res)
 			},
 			
-			//改变弹窗显隐
-			changeShow(value){
+			//获取今日打卡记录
+			async getTodayClock(){
+				let params = {
+					id: this.$userInfo.id,
+					timeZone: this.$userInfo.timeZone
+				};
+				const res = await uni.$u.http.post('/api/clock/user/list',params);
+				this.todayClock = res || {};
+				let arr = res?.list || [];
+				let list = arr.map(item=>item.clockType);
+				console.log('list',arr,list,this.clockTypeList,this.clockTypeList.filter(item=>item.typeName=='签入'))
+				if(!list.includes(this.clockTypeList.filter(item=>item.typeName==='签入')[0].id)){
+					this.clockType='签入'
+				}else if(list.includes(this.clockTypeList.filter(item=>item.typeName==='签出')[0]?.id)){
+					this.clockType = '结束';
+					if(this.timer){
+						clearInterval(this.timer)
+					}
+					this.changeClockTime()
+				}else if(list.includes(this.clockTypeList.filter(item=>item.typeName==='暂停')[0]?.id) && !list.includes(this.clockTypeList.filter(item=>item.typeName==='继续')[0]?.id)){
+					this.clockType = '暂停';
+					if(this.timer){
+						clearInterval(this.timer)
+					}
+					this.changeClockTime()
+				}else if(list.includes(this.clockTypeList.filter(item=>item.typeName==='暂停')[0]?.id) && list.includes(this.clockTypeList.filter(item=>item.typeName==='继续')[0]?.id) && !list.includes(this.clockTypeList.filter(item=>item.typeName==='签出')[0]?.id)){
+					this.clockType = '继续';
+					this.timer = setInterval(this.changeClockTime,1000)
+				}else{
+					this.clockType = '签出';
+					this.timer = setInterval(this.changeClockTime,1000)
+				}
+					
+				
+				
+			},
+			
+			//计算时间
+			changeClockTime(){
+				console.log(45454,this.clockType)
+				let startTime = '';
+				// 结束时间(当前时间)
+				let endTime = moment().format("YYYY-MM-DD HH:mm:ss")
+				// 计算两个时间相差秒数(时间差单位可以是years,months,days,minutes,seconds)
+				let timeDiff = '';
+				if(this.clockType === '签出' || this.clockType==='结束'){
+					startTime = this.todayClock.list.filter(item=>item.clockType==this.clockTypeList.filter(item=>item.typeName==='签入')[0]?.id)[0]?.clockTime || '';
+					
+					timeDiff = moment(endTime).diff(moment(startTime), "seconds");
+
+				}
+				if(this.clockType === '暂停'){
+					startTime = this.todayClock.list.filter(item=>item.clockType==this.clockTypeList.filter(item=>item.typeName==='签入')[0]?.id)[0]?.clockTime || '';
+					endTime = this.todayClock.list.filter(item=>item.clockType==this.clockTypeList.filter(item=>item.typeName==='暂停')[0]?.id)[0]?.clockTime || '';
+					timeDiff = moment(endTime).diff(moment(startTime), "seconds");
+				}
+				if(this.clockType === '继续'){
+					let startA = this.todayClock.list.filter(item=>item.clockType==this.clockTypeList.filter(item=>item.typeName==='签入')[0]?.id)[0]?.clockTime || '';
+					let endA = this.todayClock.list.filter(item=>item.clockType==this.clockTypeList.filter(item=>item.typeName==='暂停')[0]?.id)[0]?.clockTime || '';
+					let endB = moment().format("YYYY-MM-DD HH:mm:ss");
+					let timeDiffA = moment(endA).diff(moment(startA), "seconds");
+					timeDiff = timeDiffA + moment(endB).diff(moment(endA), "seconds");
+				}
+				// if(this.clockType === '结束'){
+				// 	let startA = this.todayClock.list.filter(item=>item.clockType==this.clockTypeList.filter(item=>item.typeName==='签入')[0]?.id)[0]?.clockTime || '';
+				// 	let endA = this.todayClock.list.filter(item=>item.clockType==this.clockTypeList.filter(item=>item.typeName==='暂停')[0]?.id)[0]?.clockTime || '';
+				// 	let startB = this.todayClock.list.filter(item=>item.clockType==this.clockTypeList.filter(item=>item.typeName==='继续')[0]?.id)[0]?.clockTime || '';
+				// 	let endB = this.todayClock.list.filter(item=>item.clockType==this.clockTypeList.filter(item=>item.typeName==='签出')[0]?.id)[0]?.clockTime || '';
+				// 	if(endA && endA!==''){
+				// 		let timeDiffA = moment(endA).diff(moment(startA), "seconds");
+				// 		timeDiff = timeDiffA + moment(endB).diff(moment(startB), "seconds");
+				// 	}else{
+				// 		console.log(766)
+				// 		timeDiff = moment(endB).diff(moment(startA), "seconds");
+				// 	}
+				// }
+				this.clockTime.hour =Math.floor(timeDiff / 3600) >= 10 ? Math.floor(timeDiff / 3600) : "0" + Math.floor(timeDiff / 3600);
+				timeDiff -= 3600 * this.clockTime.hour;
+				this.clockTime.minutes = Math.floor(timeDiff / 60) >= 10 ? Math.floor(timeDiff / 60) : "0" + Math.floor(timeDiff / 60);
+				timeDiff -= 60 * this.clockTime.minutes;
+				this.clockTime.seconds = Math.round(timeDiff) >= 10 ? Math.round(timeDiff) : "0" + Math.round(timeDiff);
+				
+			},
+			
+			// //获取门店信息
+			// async getStoreInfo(){
+			// 	let params = {
+			// 		orgId: this.$userInfo.orgId
+			// 	};
+			// 	const res = await uni.$u.http.post('/api/clock/clock/org/info',params);
+			// 	console.log('store',res)
+			// },
+			
+			//改变打卡选择弹窗显隐
+			changeShow(value,type){
 				this.clockTypeShow = value;
-				this.changeClockStatus()
+
+				this.clockInfo = this.clockTypeList.filter(item=>item.typeName === type)[0] || {};
+				if(type==='签出'){
+					this.changeClockShow();
+				}else{
+					//获取手机是否有定位权限
+					this.getLimits();
+				}
+				
+			},
+			
+			//改变提示弹窗显隐
+			changeToastShow(value){
+				this.toastShow = value;
+			},
+			
+			//改变签出弹窗的显隐
+			changeClockShow(value,type){
+				this.clockOutShow = value;
+				if(type==='confirm'){
+					//获取手机是否有定位权限
+					this.getLimits();
+				}
 			},
 			
 			//点击打卡
 			getClockChange(){
-				console.log(6666);
-				this.clockTypeShow = true
+				
+				if(this.clockType === '签入'){
+					this.clockInfo = this.clockTypeList.filter(item=>item.typeName === this.clockType)[0] || {};
+					
+					//获取手机是否有定位权限
+					this.getLimits();
+				}
+				if(this.clockType === '签出'){
+					this.clockTypeShow = true
+				}
+				if(this.clockType === '暂停'){
+					this.clockInfo = this.clockTypeList.filter(item=>item.typeName === '继续')[0] || {};
+					
+					//获取手机是否有定位权限
+					this.getLimits();
+				}
+				if(this.clockType === '继续'){
+					this.clockInfo = this.clockTypeList.filter(item=>item.typeName === '签出')[0] || {};
+					this.changeClockShow(true);
+					
+				}
+				
 			},
 			
-			//点击后进行打卡操作
-			changeClockStatus(){
-				//获取手机是否有定位权限
-				this.getLimits();
-			},
+		
 			
 			//获取手机是否有定位权限
 			getLimits(){
 				let that = this;
 				uni.getSystemInfo({
 					success(res) {
-						console.log('res',res);
 						let locationEnabled = res.locationEnabled; //判断手机定位服务是否开启
 						let locationAuthorized = res.locationAuthorized; //判断定位服务是否允许微信授权
 						
 						if(locationEnabled && locationAuthorized){
-							console.log('有权限');
+
 							uni.authorize({
 							    //授权请求窗口
 							    scope: "scope.userLocation", //授权的类型
 							    success: (res) => {
-							        console.log('222',res);
+
 									//获取定位信息
 									that.getLoactionInfo();
 							    },
@@ -135,7 +383,7 @@
 			
 			//获取定位信息的经纬度
 			getLoactionInfo(){
-				console.log(1112121)
+				let that = this;
 				uni.getLocation({
 					type: 'gcj02',
 					altitude: true,
@@ -143,10 +391,61 @@
 					maximumAge: 3000,
 					enableHighAccuracy: true,
 					success: function (res) {
-						console.log('location',res)
+						console.log('location',res);
+						that.latitude = res.latitude;
+						that.longitude = res.longitude;
+						let dis = that.getDistance(0,0,that.latitude,that.longitude)
+						//如果打卡地点超出距离
+						// if(dis < that.todayClock.errorDistance){
+						// 	that.toastTitle = 'You are not in the clocking range!';
+						// 	that.toastContent = 'Click heare to relocate';
+						// 	that.toastType = 'warning';
+						// 	that.changeToastShow(true);
+						// 	return;
+						// }
+						
+						//调用打卡接口
+						that.getClockSattus().then(()=>{
+							that.getTodayClock();
+						})
+
 					}
 				})
+			},
+			
+			//打卡
+			async getClockSattus(){
+				let params = {
+					clockOrgId: this.$userInfo.orgId,
+					clockTime: `${moment().format("YYYY-MM-DD")}T${moment().format("HH:mm:ss")}${this.$timezoneOffset}`,
+					clockType: this.clockInfo.id,
+					clockTypeId: 1,
+					errorDistance: 0,
+					latitude: this.latitude,
+					longitude: this.longitude
+				};
+				console.log('params',params,this.clockInfo)
+				const res = await uni.$u.http.post('/api/clock/saveOrUpdate',params);
+				this.toastTitle = 'Clock in successfully!';
+				this.toastContent = '';
+				this.toastType = 'success'
+				this.changeToastShow(true);
+				console.log('clockiiii',res)
+			},
+			
+			//获取距离
+			getDistance(lat1, lng1, lat2, lng2){
+				let radLat1 = lat1 * Math.PI / 180.0;
+				let radLat2 = lat2 * Math.PI / 180.0;
+				let a = radLat1 - radLat2;
+				let b = lng1 * Math.PI / 180.0 - lng2 * Math.PI / 180.0;
+				let s = 2 * Math.asin(Math.sqrt(Math.pow(Math.sin(a / 2), 2) + Math.cos(radLat1) * Math.cos(radLat2) * Math.pow(Math.sin(b / 2), 2)));
+				s = s * 6378.137;
+				s = Math.round(s * 10000) ;
+				console.log('s',s)
+				return s 
 			}
+			
 		}
 	}
 </script>
@@ -158,7 +457,23 @@
 		height: 100vh;
 		text-align: center;
 		margin: auto;
-		position: relative;
+		overflow: hidden;
+		background-color: #f2f2f2;
+		.clock-content-box{
+			box-sizing: border-box;
+			padding: 180rpx 20rpx 40rpx 20rpx ;
+			height: calc(100vh - 40rpx);
+		}
+		.clock-content-part{
+			overflow: hidden;
+			position: relative;
+			box-sizing: border-box;
+			// margin: 100rpx 20rpx 40rpx 20rpx ;
+			// height: calc(100vh - 220rpx);
+			height: 100%;
+			background-color: white;
+			border-radius: 14rpx;
+		}
 		.top {
 			display: flex;
 			align-items: center;
@@ -169,8 +484,8 @@
 			vertical-align: middle;
 			font-size: 120rpx;
 			font-weight: 500;
-			padding: 60rpx 0 0 0;
-			background-color: palegoldenrod;
+			padding: 80rpx 0 0 0;
+			// background-color: palegoldenrod;
 			color: #004c97;
 			
 			.desc {
@@ -281,6 +596,13 @@
 			}
 		}
 		
+		.navbar-left{
+			::v-deep .u-icon__icon{
+				font-size: 26rpx !important;
+				margin-top: 4rpx;
+			}
+		}
+		
 		.clock-re {
 			position: absolute;
 			left: calc(50% - 150rpx);
@@ -289,10 +611,44 @@
 			margin: auto;
 			width: 300rpx;
 			height: 100rpx;
+			border-radius: 50rpx;
 			background-color: #41b6e6;
 			color: white;
 			text-align: center;
 			line-height: 100rpx;
+		}
+		
+		.popup-header {
+			box-sizing: border-box;
+			padding: 0 20rpx;
+			height: 80rpx;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			border-bottom: 1px solid #fafafa;
+			box-shadow: 0 4rpx 4rpx #fafafa;
+			color: #262626;
+		}
+		::v-deep .u-icon__icon{
+			font-size: 50rpx !important;
+		}
+		.toast-content{
+			box-sizing: border-box;
+			padding: 40rpx 40rpx;
+			.toast-title{
+				font-size: 28rpx;
+			}
+			.toast-text{
+				margin-top: 30rpx;
+				font-size: 30rpx;
+				color: #41b6e6;
+			}
+		}
+		.toast-button{
+			padding: 40rpx 40rpx;
+			display: flex;
+			align-items: center;
+			justify-content: center;
 		}
 	}
 </style>
