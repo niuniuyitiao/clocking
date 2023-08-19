@@ -136,7 +136,6 @@
 			this.$nextTick(()=>{
 				this.$i18n.locale = this.$userInfo.language || 'en_US';
 			})
-			
 		},
 		computed: {
 			...mapState(['$timezoneOffset', '$userInfo']),
@@ -176,6 +175,11 @@
 				}
 
 				this.$i18n.locale = type;
+				this.languageModal = false;
+				uni.showToast({
+					title: '切换语言成功',
+					icon: 'none'
+				});
 			},
 			
 			settingHandler(type) {
