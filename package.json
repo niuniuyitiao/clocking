@@ -6,6 +6,7 @@
 	"dependencies": {},
 	"devDependencies": {
 		"eslint": "^8.2.0",
-		"eslint-config-airbnb": "^19.0.0"
+		"eslint-config-airbnb": "^19.0.0",
+		"moment": "^2.26.0"
 	}
 }
