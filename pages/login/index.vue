@@ -60,6 +60,7 @@
 
 				uni.setStorageSync('accessToken', reuslt.accessToken);
 				uni.setStorageSync('refreshToken', reuslt.refreshToken);
+				uni.setStorageSync('language', reuslt.language);
 
 				this.getUserInfo();
 				this.refreshToken();

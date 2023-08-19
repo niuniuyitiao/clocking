@@ -15,7 +15,6 @@ module.exports = (vm) => {
             }
             // 如果需要catch返回，则进行reject
             if (custom?.catch) {
-				console.log(789999);
                 return Promise.reject(data)
             } else {
                 // 否则返回一个pending中的promise
@@ -25,8 +24,16 @@ module.exports = (vm) => {
         return data.data || {}
     }, (response) => { /*  对响应错误做点什么 （statusCode !== 200）*/
 	console.log(77, response)
-		if (response.statusCode === 401 ||( response.data&&response.data.code===401)) {
-			// token过期 使用refreshToken刷新token
+		if (response.statusCode === 401 ||(response.data&&response.data.code===401)) {
+			if (response.data&&response.data.code===10025) {
+				uni.showToast({
+					title: response.data.message,
+					icon: 'none'
+				});
+			} else {
+				uni.setStorageSync('refreshToken','');
+				uni.setStorageSync('accessToken','');
+			}
 			console.log(uni.getStorageSync('refreshToken'))
 		}
         return Promise.reject(response)
