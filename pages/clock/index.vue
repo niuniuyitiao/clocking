@@ -221,7 +221,7 @@
 						clearInterval(this.timer)
 					}
 					this.changeClockTime()
-				} else if (list.includes(this.clockTypeList.filter(item=>item.typeCode==='暂停')[0]?.id) && list.includes(this.clockTypeList.filter(item=>item.typeCode==='RESUME')[0]?.id) && !list.includes(this.clockTypeList.filter(item=>item.typeCode==='CLOCK_OUT')[0]?.id)){
+				} else if (list.includes(this.clockTypeList.filter(item=>item.typeCode==='SUSPEND')[0]?.id) && list.includes(this.clockTypeList.filter(item=>item.typeCode==='RESUME')[0]?.id) && !list.includes(this.clockTypeList.filter(item=>item.typeCode==='CLOCK_OUT')[0]?.id)){
 					this.clockType = '继续';
 					this.timer = setInterval(this.changeClockTime,1000)
 				} else {
@@ -232,6 +232,7 @@
 			
 			//计算时间
 			changeClockTime(){
+				console.log('888', this.clockType)
 				let startTime = '';
 				// 结束时间(当前时间)
 				let endTime = moment().format("YYYY-MM-DD HH:mm:ss")
@@ -294,7 +295,7 @@
 					this.changeClockShow(true);
 				}else{
 					// 暂停
-					this.clockInfo = this.clockTypeList.filter(item=>item.typeCode === 'CLOCK_IN_RESUME')[0] || {};
+					this.clockInfo = this.clockTypeList.filter(item=>item.typeCode === 'SUSPEND')[0] || {};
 					// 获取手机是否有定位权限
 					this.getLimits();
 				}
@@ -345,6 +346,8 @@
 			//获取手机是否有定位权限
 			getLimits(){
 				let that = this;
+				that.getLoactionInfo()
+				return;
 				uni.getSystemInfo({
 					success(res) {
 						let locationEnabled = res.locationEnabled; //判断手机定位服务是否开启
@@ -378,6 +381,10 @@
 			//获取定位信息的经纬度
 			getLoactionInfo(){
 				let that = this;
+				that.getClockSattus().then(()=>{
+					that.getTodayClock();
+				})
+				return;
 				uni.getLocation({
 					type: 'gcj02',
 					altitude: true,
@@ -415,8 +422,8 @@
 					clockType: this.clockInfo.id,
 					clockTypeId: 1,
 					errorDistance: 0,
-					latitude: this.latitude||1,
-					longitude: this.longitude||2
+					latitude: this.latitude||31.22717203776042,
+					longitude: this.longitude||120.60072347005209
 				};
 				const res = await uni.$u.http.post('/api/clock/saveOrUpdate',params);
 				this.toastTitle = 'Clock in successfully!';
@@ -599,11 +606,10 @@
 			display: flex;
 			align-items:center;
 			font-size: 30rpx;
-			color: red;
 			::v-deep .u-icon__icon{
 				font-size: 32rpx !important;
 				margin-top: 4rpx;
-				margin-right: 20rpx;
+				margin-right: 10rpx;
 			}
 		}
 		
