@@ -238,37 +238,41 @@
 				let endTime = moment().format("YYYY-MM-DD HH:mm:ss")
 				// 计算两个时间相差秒数(时间差单位可以是years,months,days,minutes,seconds)
 				let timeDiff = '';
-				if(this.clockType === '签出' || this.clockType==='结束'){
-					startTime = this.todayClock.list.filter(item=>item.clockType==this.clockTypeList.filter(item=>item.typeName==='签入')[0]?.id)[0]?.clockTime || '';
+				if(this.clockType === '签出'){
+					startTime = this.todayClock.list.filter(item=>item.clockType==this.clockTypeList.filter(item=>item.typeCode==='CLOCK_IN')[0]?.id)[0]?.clockTime || '';
 					
 					timeDiff = moment(endTime).diff(moment(startTime), "seconds");
 
 				}
 				if(this.clockType === '暂停'){
-					startTime = this.todayClock.list.filter(item=>item.clockType==this.clockTypeList.filter(item=>item.typeName==='签入')[0]?.id)[0]?.clockTime || '';
-					endTime = this.todayClock.list.filter(item=>item.clockType==this.clockTypeList.filter(item=>item.typeName==='暂停')[0]?.id)[0]?.clockTime || '';
+					console.log(777, this.todayClock)
+					console.log(4444, this.clockTypeList)
+					startTime = this.todayClock.list.filter(item=>item.clockType==this.clockTypeList.filter(item=>item.typeCode==='CLOCK_IN')[0]?.id)[0]?.clockTime || '';
+					endTime = this.todayClock.list.filter(item=>item.clockType==this.clockTypeList.filter(item=>item.typeCode==='SUSPEND')[0]?.id)[0]?.clockTime || '';
 					timeDiff = moment(endTime).diff(moment(startTime), "seconds");
+					console.log(888, startTime)
+					console.log(999, endTime)
 				}
 				if(this.clockType === '继续'){
-					let startA = this.todayClock.list.filter(item=>item.clockType==this.clockTypeList.filter(item=>item.typeName==='签入')[0]?.id)[0]?.clockTime || '';
-					let endA = this.todayClock.list.filter(item=>item.clockType==this.clockTypeList.filter(item=>item.typeName==='暂停')[0]?.id)[0]?.clockTime || '';
+					let startA = this.todayClock.list.filter(item=>item.clockType==this.clockTypeList.filter(item=>item.typeCode==='CLOCK_IN')[0]?.id)[0]?.clockTime || '';
+					let endA = this.todayClock.list.filter(item=>item.clockType==this.clockTypeList.filter(item=>item.typeCode==='SUSPEND')[0]?.id)[0]?.clockTime || '';
 					let endB = moment().format("YYYY-MM-DD HH:mm:ss");
 					let timeDiffA = moment(endA).diff(moment(startA), "seconds");
 					timeDiff = timeDiffA + moment(endB).diff(moment(endA), "seconds");
 				}
-				// if(this.clockType === '结束'){
-				// 	let startA = this.todayClock.list.filter(item=>item.clockType==this.clockTypeList.filter(item=>item.typeName==='签入')[0]?.id)[0]?.clockTime || '';
-				// 	let endA = this.todayClock.list.filter(item=>item.clockType==this.clockTypeList.filter(item=>item.typeName==='暂停')[0]?.id)[0]?.clockTime || '';
-				// 	let startB = this.todayClock.list.filter(item=>item.clockType==this.clockTypeList.filter(item=>item.typeName==='继续')[0]?.id)[0]?.clockTime || '';
-				// 	let endB = this.todayClock.list.filter(item=>item.clockType==this.clockTypeList.filter(item=>item.typeName==='签出')[0]?.id)[0]?.clockTime || '';
-				// 	if(endA && endA!==''){
-				// 		let timeDiffA = moment(endA).diff(moment(startA), "seconds");
-				// 		timeDiff = timeDiffA + moment(endB).diff(moment(startB), "seconds");
-				// 	}else{
-				// 		console.log(766)
-				// 		timeDiff = moment(endB).diff(moment(startA), "seconds");
-				// 	}
-				// }
+				if(this.clockType === '结束'){
+					let startA = this.todayClock.list.filter(item=>item.clockType==this.clockTypeList.filter(item=>item.typeCode==='CLOCK_IN')[0]?.id)[0]?.clockTime || '';
+					let endA = this.todayClock.list.filter(item=>item.clockType==this.clockTypeList.filter(item=>item.typeCode==='SUSPEND')[0]?.id)[0]?.clockTime || '';
+					let startB = this.todayClock.list.filter(item=>item.clockType==this.clockTypeList.filter(item=>item.typeCode==='RESUME')[0]?.id)[0]?.clockTime || '';
+					let endB = this.todayClock.list.filter(item=>item.clockType==this.clockTypeList.filter(item=>item.typeCode==='CLOCK_OUT')[0]?.id)[0]?.clockTime || '';
+					if(endA && endA!==''){
+						let timeDiffA = moment(endA).diff(moment(startA), "seconds");
+						timeDiff = timeDiffA + moment(endB).diff(moment(startB), "seconds");
+					}else{
+						console.log(766)
+						timeDiff = moment(endB).diff(moment(startA), "seconds");
+					}
+				}
 				this.clockTime.hour =Math.floor(timeDiff / 3600) >= 10 ? Math.floor(timeDiff / 3600) : "0" + Math.floor(timeDiff / 3600);
 				timeDiff -= 3600 * this.clockTime.hour;
 				this.clockTime.minutes = Math.floor(timeDiff / 60) >= 10 ? Math.floor(timeDiff / 60) : "0" + Math.floor(timeDiff / 60);
