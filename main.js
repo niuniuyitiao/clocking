@@ -8,9 +8,9 @@ import store from './store'
 import uView from '@/uni_modules/uview-ui'
 
 import messages from './locale/index'
-
+console.log(88888888, uni.getStorageSync('language'))
 let i18nConfig = {
-  locale: uni.getLocale(),
+  locale: uni.getStorageSync('language')||'en_US',
   messages
 }
 import VueI18n from 'vue-i18n'
@@ -33,7 +33,9 @@ const app = new Vue({
     store,
     ...App
 })
-
+i18n.vm.$watch('locale', function(val) {
+    app.globalData.locale = val;
+});
 // 引入请求封装
 require('./util/request/index')(app)
 
