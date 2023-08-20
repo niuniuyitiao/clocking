@@ -47,14 +47,14 @@
 				
 				<!--打卡按钮-->
 				<view v-if="clockType!=='结束'" class="clock-content"  @click="getClockChange()">
-					<span v-if="clockType==='签入'">Clock In</span
+					<span v-if="clockType==='签入'">Clock In</span>
 					<span v-if="clockType==='暂停'">Resume</span>
 					<span v-if="clockType==='签出' || clockType==='继续'">Clock Out</span>
 					
 					<u-popup mode="center" :show="clockTypeShow" :closeOnClickOverlay="false">
 						<div class="popup-header">
 							<p>Clock Out</p>
-							<p><u-icon name="close" @click="changeShow(false)" color="#737373"></u-icon></p>
+							<p><u-icon name="close" @click="clockTypeShow=false" color="#737373"></u-icon></p>
 						</div>
 						
 						<div class="type-part-one" @click="changeShow(false,'暂停')">Suspend</div>
@@ -84,19 +84,21 @@
 				
 				<!--签出二次确认弹窗-->
 				<u-popup mode="center" :show="clockOutShow">
-					<div class="popup-header">
-						<p ><u-icon name="info-circle-fill"  color="#41b6e6"></u-icon></p>
-						<p><u-icon name="close" @click="changeClockShow(false)" color="#737373"></u-icon></p>
-					</div>
-					
-					<div class="toast-content">
-						<p class="toast-title">Are you sure</p>
-						<p class="toast-title" @click="changeClockShow(false)">you want to clock out?</p>
-					</div>
-					<div class="toast-button">
-						<u-button type="primary" @click="changeClockShow(false)" style="border-radius: 40rpx;background-color: #d9f0fa;border-color: #d9f0fa;color:black"  text="Cancel"></u-button>
-						<u-button type="primary" @click="changeClockShow(false,'confirm')" style="margin-left: 20rpx;border-radius: 40rpx;"  text="Confirm"></u-button>
-					</div>
+					<view class="out-confirm-container">
+						<div class="popup-header">
+							<p ><u-icon name="info-circle-fill"  color="#41b6e6"></u-icon></p>
+							<p><u-icon name="close" @click="changeClockShow(false)" color="#737373"></u-icon></p>
+						</div>
+						
+						<div class="toast-content">
+							<p class="toast-title">Are you sure</p>
+							<p class="toast-title" @click="changeClockShow(false)">you want to clock out?</p>
+						</div>
+						<div class="toast-button">
+							<u-button type="primary" @click="changeClockShow(false)" style="border-radius: 40rpx;background-color: #d9f0fa;border-color: #d9f0fa;color:black"  text="Cancel"></u-button>
+							<u-button type="primary" @click="changeClockShow(false,'confirm')" style="margin-left: 20rpx;border-radius: 40rpx;"  text="Confirm"></u-button>
+						</div>			
+					</view>
 				</u-popup>
 				
 				<!--补签弹窗-->
@@ -138,7 +140,7 @@
 				clockTypeShow: false,  //签出的弹窗选择暂停和签出
 				clockTypeList: [],  //打卡类型列表
 				todayClock: {},  //今日打卡记录
-				clockType: '',  //打卡状态
+				clockType: '签入',  //打卡状态
 				clockInfo: '',  //打卡类型信息
 				latitude: 0,  //纬度
 				longitude: 0,  //经度
@@ -179,7 +181,6 @@
 
 		methods: {
 			moment,
-			
 			//切换页面
 			changePage(){
 				uni.navigateTo({
@@ -202,44 +203,37 @@
 			
 			//获取今日打卡记录
 			async getTodayClock(){
-				let params = {
-					id: this.$userInfo.id,
-					timeZone: this.$userInfo.timeZone
-				};
-				const res = await uni.$u.http.post('/api/clock/user/list',params);
+				const res = await uni.$u.http.post('/api/clock/user/list');
+
 				this.todayClock = res || {};
 				let arr = res?.list || [];
 				let list = arr.map(item=>item.clockType);
-				console.log('list',arr,list,this.clockTypeList,this.clockTypeList.filter(item=>item.typeName=='签入'))
-				if(!list.includes(this.clockTypeList.filter(item=>item.typeName==='签入')[0].id)){
+
+				if (!list.includes(this.clockTypeList.filter(item=>item.typeCode==='CLOCK_IN')[0].id)){
 					this.clockType='签入'
-				}else if(list.includes(this.clockTypeList.filter(item=>item.typeName==='签出')[0]?.id)){
+				} else if (list.includes(this.clockTypeList.filter(item=>item.typeCode==='CLOCK_OUT')[0]?.id)){
 					this.clockType = '结束';
 					if(this.timer){
 						clearInterval(this.timer)
 					}
 					this.changeClockTime()
-				}else if(list.includes(this.clockTypeList.filter(item=>item.typeName==='暂停')[0]?.id) && !list.includes(this.clockTypeList.filter(item=>item.typeName==='继续')[0]?.id)){
+				} else if (list.includes(this.clockTypeList.filter(item=>item.typeCode==='SUSPEND')[0]?.id) && !list.includes(this.clockTypeList.filter(item=>item.typeCode==='RESUME')[0]?.id)){
 					this.clockType = '暂停';
 					if(this.timer){
 						clearInterval(this.timer)
 					}
 					this.changeClockTime()
-				}else if(list.includes(this.clockTypeList.filter(item=>item.typeName==='暂停')[0]?.id) && list.includes(this.clockTypeList.filter(item=>item.typeName==='继续')[0]?.id) && !list.includes(this.clockTypeList.filter(item=>item.typeName==='签出')[0]?.id)){
+				} else if (list.includes(this.clockTypeList.filter(item=>item.typeCode==='暂停')[0]?.id) && list.includes(this.clockTypeList.filter(item=>item.typeCode==='RESUME')[0]?.id) && !list.includes(this.clockTypeList.filter(item=>item.typeCode==='CLOCK_OUT')[0]?.id)){
 					this.clockType = '继续';
 					this.timer = setInterval(this.changeClockTime,1000)
-				}else{
+				} else {
 					this.clockType = '签出';
 					this.timer = setInterval(this.changeClockTime,1000)
 				}
-					
-				
-				
 			},
 			
 			//计算时间
 			changeClockTime(){
-				console.log(45454,this.clockType)
 				let startTime = '';
 				// 结束时间(当前时间)
 				let endTime = moment().format("YYYY-MM-DD HH:mm:ss")
@@ -297,11 +291,13 @@
 			changeShow(value,type){
 				this.clockTypeShow = value;
 
-				this.clockInfo = this.clockTypeList.filter(item=>item.typeName === type)[0] || {};
 				if(type==='签出'){
-					this.changeClockShow();
+					this.clockInfo = this.clockTypeList.filter(item=>item.typeCode === 'CLOCK_OUT')[0] || {};
+					this.changeClockShow(true);
 				}else{
-					//获取手机是否有定位权限
+					// 暂停
+					this.clockInfo = this.clockTypeList.filter(item=>item.typeCode === 'CLOCK_IN_RESUME')[0] || {};
+					// 获取手机是否有定位权限
 					this.getLimits();
 				}
 				
@@ -323,12 +319,13 @@
 			
 			//点击打卡
 			getClockChange(){
-				
 				if(this.clockType === '签入'){
+					console.log(555)
+					this.getClockSattus();
 					this.clockInfo = this.clockTypeList.filter(item=>item.typeName === this.clockType)[0] || {};
 					
 					//获取手机是否有定位权限
-					this.getLimits();
+					// this.getLimits();
 				}
 				if(this.clockType === '签出'){
 					this.clockTypeShow = true
@@ -342,9 +339,7 @@
 				if(this.clockType === '继续'){
 					this.clockInfo = this.clockTypeList.filter(item=>item.typeName === '签出')[0] || {};
 					this.changeClockShow(true);
-					
 				}
-				
 			},
 			
 		
@@ -421,16 +416,14 @@
 					clockType: this.clockInfo.id,
 					clockTypeId: 1,
 					errorDistance: 0,
-					latitude: this.latitude,
-					longitude: this.longitude
+					latitude: this.latitude||1,
+					longitude: this.longitude||2
 				};
-				console.log('params',params,this.clockInfo)
 				const res = await uni.$u.http.post('/api/clock/saveOrUpdate',params);
 				this.toastTitle = 'Clock in successfully!';
 				this.toastContent = '';
 				this.toastType = 'success'
 				this.changeToastShow(true);
-				console.log('clockiiii',res)
 			},
 			
 			//获取距离
@@ -453,6 +446,9 @@
 
 
 <style lang="scss" scoped>
+	.out-confirm-container {
+		width: 500rpx;
+	}
 	.clock {
 		height: 100vh;
 		text-align: center;
