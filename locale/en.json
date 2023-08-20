@@ -4,8 +4,16 @@
 	"home.mySchedule": "My Schedule",
 	"home.leaveApplication": "Leave Application",
 	"home.otApplication": "OT Application",
-	"home.reClock": "Re-Clock Application",
+	"home.reClock1": "Re-Clock",
+	"home.reClock2": "Application",
 	"home.myApproval": "My Approval",
 	"home.manualClock1": "Manual Clock",
-	"home.manualClock2": "Application"
+	"home.manualClock2": "Application",
+	"home.personInfo":"Person Info",
+	"home.lanSet":"Language",
+	"home.hisVersion":"History Version",
+	"home.updatePassword":"Change Password",
+	"home.loginOut":"Exit",
+	"home.close":"Close",
+	"home.closeTip":"Admin user has no permission to access this APP"
 }

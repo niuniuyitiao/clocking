@@ -116,6 +116,7 @@
 			}
 		},
 		onShow() {
+			this.applicationList=[];
 			this.getApplicationList()
 			this.getAtdTypeIdColumns()
 		},

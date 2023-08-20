@@ -1,11 +1,19 @@
 {
-	"home.title": "Attendance",
-	"home.clockInOut": "Clock In / Out",
-	"home.mySchedule": "My Schedule",
-	"home.leaveApplication": "Leave Application",
-	"home.otApplication": "OT Application",
-	"home.reClock": "Re-Clock Application",
-	"home.myApproval": "My Approval",
-	"home.manualClock1": "Manual Clock",
-	"home.manualClock2": "Application"
+	"home.title": "首頁",
+	"home.clockInOut": "打卡",
+	"home.mySchedule": "日程表",
+	"home.leaveApplication": "請假",
+	"home.otApplication": "加班申請",
+	"home.reClock1": "補簽申請",
+	"home.reClock2": "",
+	"home.myApproval": "審批",
+	"home.manualClock1": "日常申請",
+	"home.manualClock2": "",
+	"home.personInfo":"個人信息",
+	"home.lanSet":"語言設置",
+	"home.hisVersion":"曆史版本",
+	"home.updatePassword":"修改密碼",
+	"home.loginOut":"退出登陸",
+	"home.close":"关闭",
+	"home.closeTip":"管理员用户没有权限登陆此APP"
 }

@@ -1,5 +1,8 @@
 <template>
 	<view class="clock">
+		<view class="loading" v-if="loading">
+			<span>loading...</span>
+		</view>
 		<u-navbar :is-back="false"  height="60" bg-color="#fafafa">
 			<view class="navbar-left" slot="left" @click="changePage">
 				<u-icon name="arrow-left" ></u-icon>
@@ -135,6 +138,7 @@
 	export default {
 		data() {
 			return {
+				loading: true,
 				clockTypeShow: false,  //签出的弹窗选择暂停和签出
 				clockTypeList: [],  //打卡类型列表
 				todayClock: {},  //今日打卡记录
@@ -181,12 +185,7 @@
 			moment,
 			//切换页面
 			changePage(){
-				uni.navigateTo({
-					url: '/pages/home/index',
-					fail(err) {
-						console.log('重定向失败：', err);
-					}
-				})
+				uni.navigateBack({});
 			},
 			
 			//获取打卡类型列表
@@ -202,6 +201,10 @@
 			//获取今日打卡记录
 			async getTodayClock(){
 				const res = await uni.$u.http.post('/api/clock/user/list');
+				setTimeout(()=>{
+					this.loading = false;
+				}, 500);
+				
 
 				this.todayClock = res || {};
 				let arr = res?.list || [];
@@ -240,7 +243,6 @@
 				let timeDiff = '';
 				if(this.clockType === '签出'){
 					startTime = this.todayClock.list.filter(item=>item.clockType==this.clockTypeList.filter(item=>item.typeCode==='CLOCK_IN')[0]?.id)[0]?.clockTime || '';
-					
 					timeDiff = moment(endTime).diff(moment(startTime), "seconds");
 
 				}
@@ -324,8 +326,10 @@
 			getClockChange(){
 				if(this.clockType === '签入'){
 					console.log(555)
-					this.getClockSattus();
-					this.clockInfo = this.clockTypeList.filter(item=>item.typeName === this.clockType)[0] || {};
+					this.clockInfo = this.clockTypeList.filter(item=>item.typeCode === 'CLOCK_IN')[0] || {};
+					this.getClockSattus().then(()=>{
+							this.getTodayClock();
+						})
 					
 					//获取手机是否有定位权限
 					// this.getLimits();
@@ -334,13 +338,13 @@
 					this.clockTypeShow = true
 				}
 				if(this.clockType === '暂停'){
-					this.clockInfo = this.clockTypeList.filter(item=>item.typeName === '继续')[0] || {};
+					this.clockInfo = this.clockTypeList.filter(item=>item.typeCode === 'RESUME')[0] || {};
 					
 					//获取手机是否有定位权限
 					this.getLimits();
 				}
 				if(this.clockType === '继续'){
-					this.clockInfo = this.clockTypeList.filter(item=>item.typeName === '签出')[0] || {};
+					this.clockInfo = this.clockTypeList.filter(item=>item.typeCode === 'CLOCK_OUT')[0] || {};
 					this.changeClockShow(true);
 				}
 			},
@@ -420,6 +424,7 @@
 			
 			//打卡
 			async getClockSattus(){
+				console.log(5555, this.clockInfo);
 				let params = {
 					clockOrgId: this.$userInfo.orgId,
 					clockTime: `${moment().format("YYYY-MM-DD")}T${moment().format("HH:mm:ss")}${this.$timezoneOffset}`,
@@ -430,7 +435,7 @@
 					longitude: this.longitude||120.60072347005209
 				};
 				const res = await uni.$u.http.post('/api/clock/saveOrUpdate',params);
-				this.toastTitle = 'Clock in successfully!';
+				this.toastTitle = this.clockInfo.remark + ' successfully!';
 				this.toastContent = '';
 				this.toastType = 'success'
 				this.changeToastShow(true);
@@ -456,6 +461,18 @@
 
 
 <style lang="scss" scoped>
+	.loading {
+		position: fixed;
+		top: 0;
+		left: 0;
+		height: 100vh;
+		width: 100vw;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		background: #ecececfa;
+		z-index: 11;
+	}
 	.title-text {
 		font-weight: bold;
 		font-size: 38rpx;
@@ -469,6 +486,7 @@
 		margin: auto;
 		overflow: hidden;
 		background-color: #f2f2f2;
+		position: relative;
 		.clock-content-box{
 			box-sizing: border-box;
 			padding: 180rpx 20rpx 40rpx 20rpx ;

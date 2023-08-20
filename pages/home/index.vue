@@ -8,10 +8,22 @@
 			<view slot="center" class="title-text">
 				{{$t('home.title')}}
 			</view>
-			<view slot="right">
+			<view slot="right" @click="saomiaoHandler">
 				<image class="saomiao-logo" src="../../static/saomiao.png"></image>
 			</view>
 		</u-navbar>
+		
+		<u-modal :show="modalShow" :zoom="false">
+			<view class="slot-content">
+				<view class="modal-box" v-if="modalShow">
+					<image class="fail" src="../../static/fail.png"></image>
+					<span>管理员用户没有权限登陆此APP</span>
+				</view>
+			</view>
+			<view slot="confirmButton" class="modal-btn">
+				<span @click="loginOut" v-if="modalShow">关闭</span>
+			</view>
+		</u-modal>
 
 		<!-- 主页内容 -->
 		<view class="main">
@@ -46,7 +58,10 @@
 			<view class="card" @click="cardClickHandler('reClock')">
 				<image class="label-img" src="../../static/home_reclock.png"></image>
 				<view class="card-title">
-					{{$t('home.reClock')}}
+					{{$t('home.reClock1')}}
+				</view>
+				<view class="card-title">
+					{{$t('home.reClock2')}}
 				</view>
 			</view>
 
@@ -79,33 +94,33 @@
 				<view class="setting-card" @click="settingHandler('person')">
 					<view class="setting-card-left">
 						<image class="setting-label" src="../../static/setting_person.png"></image>
-						<span>个人信息</span>
+						<span>{{$t('home.personInfo')}}</span>
 					</view>
 					<image class="setting-arrow" src="../../static/setting_arrow.png"></image>
 				</view>
 				<view class="setting-card" @click="settingHandler('language')">
 					<view class="setting-card-left">
 						<image class="setting-label" src="../../static/setting_language.png"></image>
-						<span>语言设置</span>
+						<span>{{$t('home.lanSet')}}</span>
 					</view>
 					<image class="setting-arrow" src="../../static/setting_arrow.png"></image>
 				</view>
 				<view class="setting-card" @click="settingHandler('history')">
 					<view class="setting-card-left">
 						<image class="setting-label" src="../../static/setting_history.png"></image>
-						<span>历史版本</span>
+						<span>{{$t('home.hisVersion')}}</span>
 					</view>
 					<image class="setting-arrow" src="../../static/setting_arrow.png"></image>
 				</view>
 				<view class="setting-card" @click="settingHandler('password')">
 					<view class="setting-card-left">
 						<image class="setting-label" src="../../static/setting_password.png"></image>
-						<span>修改密码</span>
+						<span>{{$t('home.updatePassword')}}</span>
 					</view>
 					<image class="setting-arrow" src="../../static/setting_arrow.png"></image>
 				</view>
 				<view class="login-out">
-					<span @click="loginOut">退出登陆</span>
+					<span @click="loginOut">{{$t('home.loginOut')}}</span>
 				</view>
 			</view>
 		</u-popup>
@@ -128,13 +143,17 @@
 			return {
 				leftShow: false,
 				languageModal: false,
+				modalShow: false,
 			};
 		},
 
 		mounted() {
 			this.getTimezone();
-			this.$nextTick(()=>{
+			setTimeout(()=>{
 				this.$i18n.locale = this.$userInfo.language || 'en_US';
+				if (this.$userInfo.userType===1) {
+					this.modalShow = true;
+				}
 			})
 		},
 		computed: {
@@ -148,6 +167,13 @@
 				this.SET_TIMEZONE_LIST(result);
 				console.log('timezone', result);
 				console.log('otimeffset', this.$timezoneOffset)
+			},
+			
+			saomiaoHandler() {
+				uni.showToast({
+					title: '功能待开放',
+					icon: 'none'
+				});
 			},
 			
 			async cardClickHandler(type) {
@@ -173,13 +199,12 @@
 				if (this.$userInfo.language === 'type') {
 					return;
 				}
+				
+				await uni.$u.http.get('/api/user/setLanguage', {params: {language:type}});
 
 				this.$i18n.locale = type;
+				this.$userInfo.language = type;
 				this.languageModal = false;
-				uni.showToast({
-					title: '切换语言成功',
-					icon: 'none'
-				});
 			},
 			
 			settingHandler(type) {
@@ -241,6 +266,30 @@
 </script>
 
 <style lang="scss" scoped>
+	.modal-box {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		flex-direction: column;
+		.fail {
+			width: 100rpx;
+			height: 100rpx;
+			margin: 35rpx 0 70rpx 0;
+		}
+		span {
+			padding-bottom: 40rpx;
+		}
+	}
+	.modal-btn {
+		display: flex;
+		justify-content: center;
+		span {
+			background: #005aa0;
+			border-radius: 50px;
+			color: white;
+			padding: 16rpx 200rpx;
+		}
+	}
 	.lan-container {
 		display: flex;
 		border-radius: 20rpx;
