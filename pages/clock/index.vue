@@ -1,15 +1,13 @@
 <template>
 	<view class="clock">
-		<u-navbar :is-back="false"  height="40" bg-color="#fafafa">
-			<view class="navbar-left" slot="left" style="display: flex;align-items: center;font-size: 28rpx;" @click="changePage">
+		<u-navbar :is-back="false"  height="60" bg-color="#fafafa">
+			<view class="navbar-left" slot="left" @click="changePage">
 				<u-icon name="arrow-left" ></u-icon>
-				Back
+				<span>Back</span>
 			</view>
-			<view slot="center" class="title-text" style="font-size: 36rpx;">
+			<view slot="center" class="title-text">
 				Clock
 			</view>
-			<!-- <view slot="right">
-			</view> -->
 		</u-navbar>
 		
 		<view class="clock-content-box">
@@ -351,8 +349,9 @@
 					success(res) {
 						let locationEnabled = res.locationEnabled; //判断手机定位服务是否开启
 						let locationAuthorized = res.locationAuthorized; //判断定位服务是否允许微信授权
-						
-						if(locationEnabled && locationAuthorized){
+						console.log('locationEnabled', locationEnabled)
+						console.log('locationAuthorized', locationAuthorized)
+						if(locationEnabled){
 
 							uni.authorize({
 							    //授权请求窗口
@@ -446,6 +445,10 @@
 
 
 <style lang="scss" scoped>
+	.title-text {
+		font-weight: bold;
+		font-size: 38rpx;
+	}
 	.out-confirm-container {
 		width: 500rpx;
 	}
@@ -593,9 +596,14 @@
 		}
 		
 		.navbar-left{
+			display: flex;
+			align-items:center;
+			font-size: 30rpx;
+			color: red;
 			::v-deep .u-icon__icon{
-				font-size: 26rpx !important;
+				font-size: 32rpx !important;
 				margin-top: 4rpx;
+				margin-right: 20rpx;
 			}
 		}
 		
