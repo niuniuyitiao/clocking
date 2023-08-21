@@ -151,7 +151,6 @@
 			this.getTimezone();
 			setTimeout(()=>{
 				this.$i18n.locale = this.$userInfo.language || 'en_US';
-				console.log(741, this.$userInfo.userType);
 				if (this.$userInfo.userType===1) {
 					this.modalShow = true;
 				} else {
@@ -207,6 +206,12 @@
 
 				this.$i18n.locale = type;
 				this.$userInfo.language = type;
+				const popup = document.getElementsByClassName('u-popup');
+				let popupOver = popup[1].firstElementChild;
+				if (popupOver && popupOver.style) {
+					console.log(999)
+					popupOver.style.zIndex = 10070;
+				}
 				this.languageModal = false;
 			},
 			
