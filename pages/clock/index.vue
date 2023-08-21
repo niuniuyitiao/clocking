@@ -47,20 +47,35 @@
 				</view>
 				
 				<!--打卡按钮-->
-				<view v-if="clockType!=='结束'" class="clock-content"  @click="getClockChange()">
-					<span v-if="clockType==='签入'">Clock In</span>
+				<view  class="clock-content"  @click="getClockChange()">
+					<span v-if="clockType==='签入' || clockType==='结束'">Clock In</span>
 					<span v-if="clockType==='暂停'">Resume</span>
 					<span v-if="clockType==='签出' || clockType==='继续'">Clock Out</span>
 					
 					<u-popup mode="center" :show="clockTypeShow" :closeOnClickOverlay="false">
 						<div class="popup-header">
-							<p>Clock Out</p>
+							<p v-if="clockType==='签出'">Clock Out</p>
+							<p v-if="clockType==='结束'">Clock In</p>
 							<p><u-icon name="close" @click="clockTypeShow=false" color="#737373"></u-icon></p>
 						</div>
 						
-						<div class="type-part-one" @click="changeShow(false,'暂停')">Suspend</div>
+						<div v-if="clockType==='签出'" class="type-part-one" @click="changeShow(false,'暂停')">
+							<img src="../../static/images/suspend.png" alt="">
+							<span>Suspend</span>
+						</div>
+						<div v-if="clockType==='签出'" class="type-part-one" @click="changeShow(false,'签出')">
+							<img src="../../static/images/clock_out.png" alt="">
+							<span>Out</span>
+						</div>
 						
-						<div class="type-part-one" @click="changeShow(false,'签出')">Out</div>
+						<div v-if="clockType==='结束'" class="type-part-one" @click="changeShow(false,'继续上班打卡')">
+							<img src="../../static/images/resume.png" alt="">
+							<span>Resume</span>
+						</div>
+						<div v-if="clockType==='结束'" class="type-part-one" @click="changeShow(false,'签入')">
+							<img src="../../static/images/clock_in.png" alt="">
+							<span>Clock in</span>
+						</div>
 					</u-popup>
 				</view>
 				
@@ -177,7 +192,7 @@
 			this.getClockTypeList().then(()=>{
 				this.getTodayClock();
 			})
-			
+
 			// this.getStoreInfo();
 		},
 
@@ -187,6 +202,7 @@
 			changePage(){
 				uni.navigateBack({});
 			},
+			
 			
 			//获取打卡类型列表
 			async getClockTypeList(){
@@ -205,76 +221,91 @@
 					this.loading = false;
 				}, 500);
 				
-
 				this.todayClock = res || {};
+				
+				
 				let arr = res?.list || [];
-				let list = arr.map(item=>item.clockType);
-
-				if (!list.includes(this.clockTypeList.filter(item=>item.typeCode==='CLOCK_IN')[0].id)){
-					this.clockType='签入'
-				} else if (list.includes(this.clockTypeList.filter(item=>item.typeCode==='CLOCK_OUT')[0]?.id)){
-					this.clockType = '结束';
+				let length = arr.length-1 || 0;
+				
+				let type = this.clockTypeList.filter(ele=>ele.id===arr[length]?.clockType)[0]?.typeCode;
+				console.log('type',arr,length,arr[length]?.clockType,type)
+				this.clockType = type==='CLOCK_IN'?'签出':type==='SUSPEND'?'暂停':type==='RESUME'?'继续':type==='CLOCK_IN_RESUME'?'签出':'结束';
+				if(type === 'CLOCK_OUT' || type === 'SUSPEND'){
 					if(this.timer){
 						clearInterval(this.timer)
 					}
-					this.changeClockTime()
-				} else if (list.includes(this.clockTypeList.filter(item=>item.typeCode==='SUSPEND')[0]?.id) && !list.includes(this.clockTypeList.filter(item=>item.typeCode==='RESUME')[0]?.id)){
-					this.clockType = '暂停';
-					if(this.timer){
-						clearInterval(this.timer)
-					}
-					this.changeClockTime()
-				} else if (list.includes(this.clockTypeList.filter(item=>item.typeCode==='SUSPEND')[0]?.id) && list.includes(this.clockTypeList.filter(item=>item.typeCode==='RESUME')[0]?.id) && !list.includes(this.clockTypeList.filter(item=>item.typeCode==='CLOCK_OUT')[0]?.id)){
-					this.clockType = '继续';
-					this.timer = setInterval(this.changeClockTime,1000)
-				} else {
-					this.clockType = '签出';
-					this.timer = setInterval(this.changeClockTime,1000)
+					this.getClockTime();
+				}else{
+					this.timer = setInterval(this.getClockTime,1000)
 				}
+				
+			},
+			
+			getClockTime(){
+				let arr = this.todayClock?.list || [];
+				console.log('21231231',arr,this.todayClock)
+				let list = [];
+				let timeDiff = 0;
+
+				arr.forEach(item=>{
+					list.push(item);
+											
+					if(this.clockTypeList.filter(ele=>ele.id===item.clockType)[0]?.typeCode === 'CLOCK_OUT'){
+						console.log('list',list);
+						timeDiff+=this.getTimeDiff(list);
+						list=[]
+					}
+				})
+				
+				timeDiff+=this.getTimeDiff(list);
+				this.changeTimeDiff(timeDiff);
+			},
+			
+			//计算时长
+			getTimeDiff(data){
+				let startA = 0;
+				let endA = 0;
+				let startB = 0;
+				let endB = 0;
+				let timeDiff = 0;
+				data.forEach(item=>{
+					if(this.clockTypeList.filter(ele=>ele.id===item.clockType)[0]?.typeCode === 'CLOCK_IN' || this.clockTypeList.filter(item=>item.id===item.clockType)[0]?.typeCode === 'CLOCK_IN_RESUME'){
+						startA = item.clockTime;
+					}
+					if(this.clockTypeList.filter(ele=>ele.id===item.clockType)[0]?.typeCode === 'SUSPEND'){
+						endA = item.clockTime;
+					}
+					if(this.clockTypeList.filter(ele=>ele.id===item.clockType)[0]?.typeCode === 'RESUME'){
+						startB = item.clockTime;
+					}
+					if(this.clockTypeList.filter(ele=>ele.id===item.clockType)[0]?.typeCode === 'CLOCK_OUT'){
+						endB = item.clockTime;
+					}
+				})
+				if(endA && endB){
+					let timeDiffA = moment(endA).diff(moment(startA), "seconds");
+					timeDiff = timeDiffA + moment(endB).diff(moment(startB), "seconds");
+				}else if(endB && !endA){
+					timeDiff = moment(endB).diff(moment(startA), "seconds");
+				}
+				else if(startB && !endB){
+					endB = moment().format("YYYY-MM-DD HH:mm:ss");
+					let timeDiffA = moment(endA).diff(moment(startA), "seconds");
+					timeDiff = timeDiffA + moment(endB).diff(moment(startB), "seconds");
+				}else if(endA && !startB){
+					timeDiff = moment(endA).diff(moment(startA), "seconds");
+				}else if(startA){
+					endB = moment().format("YYYY-MM-DD HH:mm:ss");
+					timeDiff =  moment(endB).diff(moment(startA), "seconds");
+				}
+				
+				
+				return timeDiff;
 			},
 			
 			//计算时间
-			changeClockTime(){
-				console.log('888', this.clockType)
-				let startTime = '';
-				// 结束时间(当前时间)
-				let endTime = moment().format("YYYY-MM-DD HH:mm:ss")
-				// 计算两个时间相差秒数(时间差单位可以是years,months,days,minutes,seconds)
-				let timeDiff = '';
-				if(this.clockType === '签出'){
-					startTime = this.todayClock.list.filter(item=>item.clockType==this.clockTypeList.filter(item=>item.typeCode==='CLOCK_IN')[0]?.id)[0]?.clockTime || '';
-					timeDiff = moment(endTime).diff(moment(startTime), "seconds");
-
-				}
-				if(this.clockType === '暂停'){
-					console.log(777, this.todayClock)
-					console.log(4444, this.clockTypeList)
-					startTime = this.todayClock.list.filter(item=>item.clockType==this.clockTypeList.filter(item=>item.typeCode==='CLOCK_IN')[0]?.id)[0]?.clockTime || '';
-					endTime = this.todayClock.list.filter(item=>item.clockType==this.clockTypeList.filter(item=>item.typeCode==='SUSPEND')[0]?.id)[0]?.clockTime || '';
-					timeDiff = moment(endTime).diff(moment(startTime), "seconds");
-					console.log(888, startTime)
-					console.log(999, endTime)
-				}
-				if(this.clockType === '继续'){
-					let startA = this.todayClock.list.filter(item=>item.clockType==this.clockTypeList.filter(item=>item.typeCode==='CLOCK_IN')[0]?.id)[0]?.clockTime || '';
-					let endA = this.todayClock.list.filter(item=>item.clockType==this.clockTypeList.filter(item=>item.typeCode==='SUSPEND')[0]?.id)[0]?.clockTime || '';
-					let endB = moment().format("YYYY-MM-DD HH:mm:ss");
-					let timeDiffA = moment(endA).diff(moment(startA), "seconds");
-					timeDiff = timeDiffA + moment(endB).diff(moment(endA), "seconds");
-				}
-				if(this.clockType === '结束'){
-					let startA = this.todayClock.list.filter(item=>item.clockType==this.clockTypeList.filter(item=>item.typeCode==='CLOCK_IN')[0]?.id)[0]?.clockTime || '';
-					let endA = this.todayClock.list.filter(item=>item.clockType==this.clockTypeList.filter(item=>item.typeCode==='SUSPEND')[0]?.id)[0]?.clockTime || '';
-					let startB = this.todayClock.list.filter(item=>item.clockType==this.clockTypeList.filter(item=>item.typeCode==='RESUME')[0]?.id)[0]?.clockTime || '';
-					let endB = this.todayClock.list.filter(item=>item.clockType==this.clockTypeList.filter(item=>item.typeCode==='CLOCK_OUT')[0]?.id)[0]?.clockTime || '';
-					if(endA && endA!==''){
-						let timeDiffA = moment(endA).diff(moment(startA), "seconds");
-						timeDiff = timeDiffA + moment(endB).diff(moment(startB), "seconds");
-					}else{
-						console.log(766)
-						timeDiff = moment(endB).diff(moment(startA), "seconds");
-					}
-				}
+			changeTimeDiff(timeDiff){
+				
 				this.clockTime.hour =Math.floor(timeDiff / 3600) >= 10 ? Math.floor(timeDiff / 3600) : "0" + Math.floor(timeDiff / 3600);
 				timeDiff -= 3600 * this.clockTime.hour;
 				this.clockTime.minutes = Math.floor(timeDiff / 60) >= 10 ? Math.floor(timeDiff / 60) : "0" + Math.floor(timeDiff / 60);
@@ -299,9 +330,18 @@
 				if(type==='签出'){
 					this.clockInfo = this.clockTypeList.filter(item=>item.typeCode === 'CLOCK_OUT')[0] || {};
 					this.changeClockShow(true);
-				}else{
+				}else if(type==='暂停'){
 					// 暂停
 					this.clockInfo = this.clockTypeList.filter(item=>item.typeCode === 'SUSPEND')[0] || {};
+					// 获取手机是否有定位权限
+					this.getLimits();
+				}else if(type === '继续上班打卡'){
+					this.clockInfo = this.clockTypeList.filter(item=>item.typeCode === 'CLOCK_IN_RESUME')[0] || {};
+					// 获取手机是否有定位权限
+					this.getLimits();
+				}
+				else if(type === '签入'){
+					this.clockInfo = this.clockTypeList.filter(item=>item.typeCode === 'CLOCK_IN')[0] || {};
 					// 获取手机是否有定位权限
 					this.getLimits();
 				}
@@ -324,12 +364,12 @@
 			
 			//点击打卡
 			getClockChange(){
+				console.log(6666999999, this.clockType)
 				if(this.clockType === '签入'){
-					console.log(555)
 					this.clockInfo = this.clockTypeList.filter(item=>item.typeCode === 'CLOCK_IN')[0] || {};
 					this.getClockSattus().then(()=>{
 							this.getTodayClock();
-						})
+					})
 					
 					//获取手机是否有定位权限
 					// this.getLimits();
@@ -346,6 +386,9 @@
 				if(this.clockType === '继续'){
 					this.clockInfo = this.clockTypeList.filter(item=>item.typeCode === 'CLOCK_OUT')[0] || {};
 					this.changeClockShow(true);
+				}
+				if(this.clockType === '结束'){
+					this.clockTypeShow = true
 				}
 			},
 			
@@ -424,7 +467,7 @@
 			
 			//打卡
 			async getClockSattus(){
-				console.log(5555, this.clockInfo);
+				console.log(5555, this.clockInfo,this.$userInfo);
 				let params = {
 					clockOrgId: this.$userInfo.orgId,
 					clockTime: `${moment().format("YYYY-MM-DD")}T${moment().format("HH:mm:ss")}${this.$timezoneOffset}`,
@@ -545,7 +588,9 @@
 		.time-line {
 			width: 100%;
 			box-sizing: border-box;
-			height: 400rpx;
+			// height: 500rpx;
+			height: calc(60% - 300rpx);
+			overflow-y: auto;
 			padding: 48rpx 40rpx 20rpx 80rpx;
 			// background-color: #b3b3b3;
 			
@@ -607,9 +652,11 @@
 			}
 			
 			.type-part-one{
+				display: flex;
+				align-items: center;
 				margin: 20rpx auto 10rpx;
-				display: block;
-				width: 60%;
+				
+				// width: 60%;
 				// width: 200rpx;
 				height: 80rpx;
 				line-height: 80rpx;
@@ -618,6 +665,11 @@
 				// background-color: #d9f0fa;
 				border-radius: 40rpx;
 				content: 'Suspend';
+				img{
+					width: 50rpx;
+					height: 50rpx;
+					margin-right: 10rpx;
+				}
 			}
 			.type-part-one:hover{
 				background-color: #d9f0fa;
