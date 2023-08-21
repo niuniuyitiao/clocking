@@ -80,7 +80,7 @@
 				</view>
 				
 				<!--补卡按钮-->
-				<view class="clock-re" @click="reClockShow=true">
+				<view class="clock-re" @click="openReClcok">
 					<span>Re-Clock</span>
 				</view>
 				
@@ -126,12 +126,18 @@
 				
 					<div class="re-clock-content">
 						<u-form class="form" :model="reClockInfo" :rules="rules" ref="uForm">
-							<u-form-item required labelWidth='0' >
+							<u-form-item required labelWidth='0' prop="reClcokType">
 								<u--input
+									:value="reClockInfo.reClcokType"
 									placeholder="Re-Clock Type"
-									suffixIcon="arrow-down-fill"
-									suffixIconStyle="color: #d0d0d0;"
-								></u--input>
+									@focus="reClcokTypeshow=true"
+									@click="reClcokTypeshow=true"
+									@blur="reClcokTypeshow=false"
+								>
+									<template slot="suffix">
+										<u-icon @click="reClcokTypeshow=true" name="arrow-down-fill"  color=" #d0d0d0"></u-icon>
+									</template>
+								</u--input>
 						
 							</u-form-item>
 							<u-form-item required labelWidth='0' prop="reClockTime">
@@ -169,6 +175,14 @@
 					@cancel="dateShow=false"
 					@confirm="getReClockTime"
 				></u-datetime-picker>
+				
+				<u-picker 
+					:show="reClcokTypeshow" 
+					@close="reClcokTypeshow=false"
+					@cancel="reClcokTypeshow=false"
+					@confirm="getReClockType" 
+					:columns="columns">
+				</u-picker>
 			</view>
 		</view>
 	</view>
@@ -202,11 +216,18 @@
 				clockOutShow: false, //签出二次确认弹框
 				reClockShow: false, //补卡弹窗
 				dateShow: false, //选择时间弹窗
+				reClcokTypeshow: false,
 				reClockInfo:{
+					reClcokType: '',
 					reClockTime: '',
 					comments: '',
 				},
 				rules: {
+					reClcokType: {
+						required: true,
+						message: 'Clock Time is Require',
+						trigger: ['blur', 'change']
+					},
 					reClockTime: {
 						required: true,
 						message: 'Clock Time is Require',
@@ -218,6 +239,9 @@
 						trigger: ['blur', 'change']
 					},
 				},
+				columns: [
+                    ['Clock in', 'Suspend', 'Resume', 'Clock out', 'Clock In Resume']
+                ],
 			};
 		},
 		
@@ -251,7 +275,7 @@
 			
 			//获取打卡类型列表
 			async getClockTypeList(){
-				console.log(666,this.$userInfo,moment().format(""));
+				
 				let params = {
 					"flag": 3
 				}
@@ -273,7 +297,7 @@
 				let length = arr.length-1 || 0;
 				
 				let type = this.clockTypeList.filter(ele=>ele.id===arr[length]?.clockType)[0]?.typeCode;
-				console.log('type',arr,length,arr[length]?.clockType,type)
+
 				this.clockType = type==='CLOCK_IN'?'签出':type==='SUSPEND'?'暂停':type==='RESUME'?'继续':type==='CLOCK_IN_RESUME'?'签出':'结束';
 				if(type === 'CLOCK_OUT' || type === 'SUSPEND'){
 					if(this.timer){
@@ -288,7 +312,7 @@
 			
 			getClockTime(){
 				let arr = this.todayClock?.list || [];
-				console.log('21231231',arr,this.todayClock)
+
 				let list = [];
 				let timeDiff = 0;
 
@@ -296,7 +320,7 @@
 					list.push(item);
 											
 					if(this.clockTypeList.filter(ele=>ele.id===item.clockType)[0]?.typeCode === 'CLOCK_OUT'){
-						console.log('list',list);
+					
 						timeDiff+=this.getTimeDiff(list);
 						list=[]
 					}
@@ -409,7 +433,7 @@
 			
 			//点击打卡
 			getClockChange(){
-				console.log(6666999999, this.clockType)
+
 				if(this.clockType === '签入'){
 					this.clockInfo = this.clockTypeList.filter(item=>item.typeCode === 'CLOCK_IN')[0] || {};
 					this.getClockSattus().then(()=>{
@@ -512,7 +536,7 @@
 			
 			//打卡
 			async getClockSattus(){
-				console.log(5555, this.clockInfo,this.$userInfo);
+			
 				let params = {
 					clockOrgId: this.$userInfo.orgId,
 					clockTime: `${moment().format("YYYY-MM-DD")}T${moment().format("HH:mm:ss")}${this.$timezoneOffset}`,
@@ -538,8 +562,23 @@
 				let s = 2 * Math.asin(Math.sqrt(Math.pow(Math.sin(a / 2), 2) + Math.cos(radLat1) * Math.cos(radLat2) * Math.pow(Math.sin(b / 2), 2)));
 				s = s * 6378.137;
 				s = Math.round(s * 10000) ;
-				console.log('s',s)
 				return s 
+			},
+			
+			//打开补卡弹窗
+			openReClcok(){
+				this.reClockInfo={
+					reClcokType: '',
+					reClockTime: '',
+					comments: '',
+				};
+				this.reClockShow = true;
+			},
+			
+			//获取补签选择类型
+			getReClockType(data){
+				this.reClockInfo.reClcokType=data.value[0] || '';
+				this.reClcokTypeshow = false;
 			},
 			
 			//获取补签选中的时间
@@ -547,7 +586,7 @@
 				if(data.value){
 					this.reClockInfo.reClockTime = moment(data.value).format("YYYY-MM-DD HH:mm:ss")
 				}
-				console.log(666,this.reClockInfo.reClockTime,typeof this.reClockInfo.reClockTime)
+
 				this.dateShow = false;
 			},
 			
@@ -558,7 +597,7 @@
 			
 			//补卡确定
 			submitReClock(){
-				console.log('reClockInfo.comments',this.reClockInfo)
+
 				this.$refs.uForm.validate()
 			}
 			
