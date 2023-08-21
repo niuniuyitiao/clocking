@@ -80,7 +80,7 @@
 				</view>
 				
 				<!--补卡按钮-->
-				<view class="clock-re">
+				<view class="clock-re" @click="reClockShow=true">
 					<span>Re-Clock</span>
 				</view>
 				
@@ -118,30 +118,57 @@
 				</u-popup>
 				
 				<!--补签弹窗-->
-				<!-- <u-popup mode="center" :show="">
+				<u-popup mode="center" :show="reClockShow">
 					<div class="popup-header">
-						<p >Re-Clock</p>
-						<p><u-icon name="close" color="#737373"></u-icon></p>
+						<p >Re-Clock</p >
+						<p @click="reClockShow=false"><u-icon name="close" color="#737373"></u-icon></p >
 					</div>
-					
+				
 					<div class="re-clock-content">
-						<u-form class="form">
-							<u-form-item labelWidth="auto" label="" required >
+						<u-form class="form" :model="reClockInfo" :rules="rules" ref="uForm">
+							<u-form-item required labelWidth='0' >
+								<u--input
+									placeholder="Re-Clock Type"
+									suffixIcon="arrow-down-fill"
+									suffixIconStyle="color: #d0d0d0;"
+								></u--input>
+						
+							</u-form-item>
+							<u-form-item required labelWidth='0' prop="reClockTime">
+								<u--input
+									placeholder="Re-Clock Type"
+									:value="reClockInfo.reClockTime"
+									@focus="dateShow=true"
+									@click="dateShow=true"
+									@blur="dateShow=false"
+								>
+									<template slot="suffix">
+										<u-icon @click="dateShow=true" name="calendar"  color=" #d0d0d0"></u-icon>
+									</template>
+								</u--input>
 								
 							</u-form-item>
-							<u-form-item labelWidth="auto" label="" @click="showAtdTypeId=true" required>
-								
-							
-							<u-form-item labelWidth="auto" label="" required>
-								<u-textarea  placeholder="Comments"></u-textarea>
+					
+				
+							<u-form-item required labelWidth='0' prop="comments">
+								<u-textarea @input="getComments" :value="reClockInfo.comments" placeholder="Comments" :confirmType="null"></u-textarea>
 							</u-form-item>
-							<div>
-								<u-button type="primary"  style="border-radius: 40rpx;background-color: #d9f0fa;border-color: #d9f0fa;color:black"  text="Cancel"></u-button>
-								<u-button type="primary"  style="margin-left: 20rpx;border-radius: 40rpx;"  text="Confirm"></u-button>
+					
+							<div class="toast-button">
+								<u-button @click="reClockShow=false" type="primary" style="border-radius: 40rpx;background-color: #d9f0fa;border-color: #d9f0fa;color:black" text="Cancel"></u-button>
+								<u-button @click="submitReClock" type="primary" style="margin-left: 20rpx;border-radius: 40rpx;" text="Confirm"></u-button>
 							</div>
 						</u-form>
 					</div>
-				</u-popup> -->
+				</u-popup>
+				<u-datetime-picker
+					:show="dateShow"
+					mode="datetime"
+					:closeOnClickOverlay="true"
+					@close="dateShow=false"
+					@cancel="dateShow=false"
+					@confirm="getReClockTime"
+				></u-datetime-picker>
 			</view>
 		</view>
 	</view>
@@ -173,6 +200,24 @@
 				},   //时间
 				timer: null,
 				clockOutShow: false, //签出二次确认弹框
+				reClockShow: false, //补卡弹窗
+				dateShow: false, //选择时间弹窗
+				reClockInfo:{
+					reClockTime: '',
+					comments: '',
+				},
+				rules: {
+					reClockTime: {
+						required: true,
+						message: 'Clock Time is Require',
+						trigger: ['blur', 'change']
+					},
+					comments: {
+						required: true,
+						message: 'Comments is Require',
+						trigger: ['blur', 'change']
+					},
+				},
 			};
 		},
 		
@@ -495,6 +540,26 @@
 				s = Math.round(s * 10000) ;
 				console.log('s',s)
 				return s 
+			},
+			
+			//获取补签选中的时间
+			getReClockTime(data){
+				if(data.value){
+					this.reClockInfo.reClockTime = moment(data.value).format("YYYY-MM-DD HH:mm:ss")
+				}
+				console.log(666,this.reClockInfo.reClockTime,typeof this.reClockInfo.reClockTime)
+				this.dateShow = false;
+			},
+			
+			//获取comments
+			getComments(data){
+				this.reClockInfo.comments = data;
+			},
+			
+			//补卡确定
+			submitReClock(){
+				console.log('reClockInfo.comments',this.reClockInfo)
+				this.$refs.uForm.validate()
 			}
 			
 		}
@@ -733,6 +798,27 @@
 			display: flex;
 			align-items: center;
 			justify-content: center;
+		}
+		.re-clock-content{
+			box-sizing: border-box;
+			padding: 40rpx;
+			::v-deep .uicon-arrow-down-fill{
+				font-size: 24rpx !important;
+			}
+			
+			
+			::v-deep .u-form-item__body__left__content{
+				display: none !important;
+			}
+			::v-deep .uni-textarea-placeholder{
+				text-align: left;
+			}
+			::v-deep .uni-textarea-textarea{
+				text-align: left;
+			}
+			::v-deep .u-form-item__body__right__message{
+				text-align: left;
+			}
 		}
 	}
 </style>
