@@ -64,14 +64,6 @@
 
 				this.getUserInfo();
 				this.refreshToken();
-
-				uni.redirectTo({
-					url: '/pages/home/index',
-					fail(err) {
-						console.log('重定向失败：', err);
-					}
-				})
-
 			},
 
 			async getUserInfo() {
@@ -82,6 +74,12 @@
 				});
 				this.SET_USER_INFO(result);
 				console.log('user', result);
+				uni.redirectTo({
+					url: '/pages/home/index',
+					fail(err) {
+						console.log('重定向失败：', err);
+					}
+				})
 			},
 
 			async refreshToken() {
