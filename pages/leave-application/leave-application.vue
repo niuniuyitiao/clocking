@@ -1,9 +1,9 @@
 <template>
 	<view class="container">
-		<u-navbar border autoBack leftText="Back" title="LeaveApplication" :safeAreaInsetTop="false"
+		<u-navbar border autoBack leftText="Back" :title="$t('application.leaveApplication')" :safeAreaInsetTop="false"
 			:height="customBar+'px'"></u-navbar>
 		<view class="search-wrap" :style="{marginTop:customBar+'px'}">
-			<u-search v-model="applyNo" placeholder="Apply Number" shape="square" :showAction="false"
+			<u-search v-model="applyNo" :placeholder="$t('application.applyNumber')" shape="square" :showAction="false"
 				@clear="getApplicationList" @search="getApplicationList"></u-search>
 			<image @click="showFilter=true" class="filter-icon" src="../../static/images/notification_filter.png"
 				mode=""></image>
@@ -21,7 +21,7 @@
 				</view>
 				<view class="item-flex">
 					<view class="item-text">
-						Apply Date: {{item.applyDate}}
+						{{$t('application.applyDate')}}: {{item.applyDate}}
 						<!--  {{$u.timeFormat(new Date(item.createTime).getTime(), 'yyyy-mm-dd hh:MM')}} -->
 					</view>
 					<view class="item-text">
@@ -34,7 +34,7 @@
 		<u-popup :show="showFilter" mode="right" @close="closeFilter">
 			<view class="filter-content">
 				<u-form labelPosition="left" labelWidth="auto">
-					<u-form-item label="Apply Date" @click="showCalendar=true">
+					<u-form-item :label="$t('application.applyDate')" @click="showCalendar=true">
 						<u-input :value="applyDateShow" disabled placeholder="Start Date → End Date">
 							<template slot="suffix">
 								<image class="calendar-icon" src="../../static/images/calendar_notselect.png" mode="">
@@ -42,14 +42,14 @@
 							</template>
 						</u-input>
 					</u-form-item>
-					<u-form-item labelWidth="auto" label="Leave Type" @click="showAtdTypeId=true">
+					<u-form-item labelWidth="auto" :label="$t('application.LeaveType')" @click="showAtdTypeId=true">
 						<u-input :value="atdTypeId.typeName" placeholder="Please select" disabled>
 							<template slot="suffix">
 								<u-icon name="arrow-down" color="#ccc" size="24"></u-icon>
 							</template>
 						</u-input>
 					</u-form-item>
-					<u-form-item labelWidth="auto" label="Status" @click="showStatus=true">
+					<u-form-item labelWidth="auto" :label="$t('application.status')" @click="showStatus=true">
 						<u-input :value="status.name" placeholder="Please select" disabled>
 							<template slot="suffix">
 								<u-icon name="arrow-down" color="#ccc" size="24"></u-icon>
@@ -58,14 +58,14 @@
 					</u-form-item>
 				</u-form>
 				<view class="footer">
-					<u-button :plain="true" :hairline="false" text="Reset" @click="handleReset"></u-button>
-					<u-button :plain="true" :hairline="false" text="Confirm" @click="handleSubmit"></u-button>
+					<u-button :plain="true" :hairline="false" :text="$t('application.reset')" @click="handleReset"></u-button>
+					<u-button :plain="true" :hairline="false" :text="$t('application.confirm')" @click="handleSubmit"></u-button>
 				</view>
 				<u-calendar :allowSameDay="true" mode="range" @close="showCalendar=false" :closeOnClickOverlay="true"
 					:show="showCalendar" @confirm="confirmCalendar"></u-calendar>
 				<u-picker :show="showAtdTypeId" :columns="[atdTypeIdColumns]" keyName="typeName"
-					@close="showAtdTypeId=false" @confirm="confirmAtdTypeId"></u-picker>
-				<u-picker :show="showStatus" :columns="[statusColumns]" keyName="name" @close="showStatus=false"
+					@cancel="showAtdTypeId=false" @confirm="confirmAtdTypeId"></u-picker>
+				<u-picker :show="showStatus" :columns="[statusColumns]" keyName="name" @cancel="showStatus=false"
 					@confirm="confirmStatus"></u-picker>
 			</view>
 

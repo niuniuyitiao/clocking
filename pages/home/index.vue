@@ -151,8 +151,11 @@
 			this.getTimezone();
 			setTimeout(()=>{
 				this.$i18n.locale = this.$userInfo.language || 'en_US';
+				console.log(741, this.$userInfo.userType);
 				if (this.$userInfo.userType===1) {
 					this.modalShow = true;
+				} else {
+					this.modalShow = false;
 				}
 			})
 		},
