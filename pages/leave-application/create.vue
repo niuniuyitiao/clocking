@@ -1,9 +1,9 @@
 <template>
 	<view class="container">
-		<u-navbar border autoBack leftText="Back" title="LeaveApplication" :safeAreaInsetTop="false"
+		<u-navbar border autoBack leftText="Back" :title="$t('application.leaveApplication')" :safeAreaInsetTop="false"
 			:height="customBar+'px'"></u-navbar>
 		<u-form class="form" :style="{marginTop:customBar+'px'}">
-			<u-form-item labelWidth="auto" label="Leave Date:" required @click="showCalendar=true">
+			<u-form-item labelWidth="auto" :label="$t('application.leaveDate')+':'" required @click="showCalendar=true">
 				<u-input :value="applyDateShow" disabled placeholder="Start Date → End Date">
 					<template slot="suffix">
 						<image class="calendar-icon" src="../../static/images/calendar_notselect.png" mode="">
@@ -11,35 +11,36 @@
 					</template>
 				</u-input>
 			</u-form-item>
-			<u-form-item labelWidth="auto" label="Leave Type:" @click="showAtdTypeId=true" required>
+			<u-form-item labelWidth="auto" :label="$t('application.LeaveType')+':'" @click="showAtdTypeId=true"
+				required>
 				<u-input :value="form.atdTypeId.typeName" placeholder="Please select" disabled>
 					<template slot="suffix">
 						<u-icon name="arrow-down" color="#ccc" size="24"></u-icon>
 					</template>
 				</u-input>
 			</u-form-item>
-			<u-form-item labelWidth="auto" label="Total Leave Hours:" required>
+			<u-form-item labelWidth="auto" :label="$t('application.totalLeaveHours')+':'" required>
 				<u-input :value="form.totalHours" disabled></u-input>
 			</u-form-item>
-			<u-form-item labelWidth="auto" label="Comments:" required>
+			<u-form-item labelWidth="auto" :label="$t('application.comments')+':'" required>
 				<u-textarea v-model="form.reason" placeholder="Comments" :confirmType="null"></u-textarea>
 			</u-form-item>
 			<u-button @click="handleSubmit">Submit</u-button>
 		</u-form>
 		<view class="leave-details">
 			<view class="title">
-				Leave Details
+				{{$t('application.leaveDetails')}}
 			</view>
 			<view class="leave-table">
 				<view class="table-head table-column">
-					<view class="column-item">Date</view>
+					<view class="column-item">{{$t('application.date')}}</view>
 					<view class="column-item">
 						<view class="column-item-border border-none">
-							<view>Start Time </view>
-							<view>End Time </view>
+							<view>{{$t('application.startTime')}}</view>
+							<view>{{$t('application.endTime')}}</view>
 						</view>
 					</view>
-					<view class="column-item">Leave Hours</view>
+					<view class="column-item">{{$t('application.leaveHours')}}</view>
 				</view>
 				<view class="table-column" v-for="(item,index) in leaveDetailsList" :key="index">
 					<view class="column-item">
@@ -49,19 +50,19 @@
 						<view class="column-item-border">
 							<view class="start-time" @click="handleShowDatetime(index,'startTime')">
 								{{item.startTime}}
-								<text v-show="!item.startTime">Start Time</text>
+								<text v-show="!item.startTime">{{$t('application.startTime')}}</text>
 							</view>
 							—
 							<view class="start-time" @click="handleShowDatetime(index,'endTime')">
 								{{item.endTime}}
-								<text v-show="!item.endTime">End Time</text>
+								<text v-show="!item.endTime">{{$t('application.endTime')}}</text>
 							</view>
 						</view>
 					</view>
 					<view class="column-item">
 						<view class="column-item-border">
 							{{item.totalHours}}
-							<text v-show="!item.totalHours">Leave Hours</text>
+							<text v-show="!item.totalHours">{{$t('application.leaveHours')}}</text>
 						</view>
 					</view>
 				</view>

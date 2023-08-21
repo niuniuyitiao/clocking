@@ -1,6 +1,6 @@
 <template>
 	<view class="container">
-		<u-navbar border autoBack leftText="Back" title="LeaveApplication" :safeAreaInsetTop="false"
+		<u-navbar border autoBack leftText="Back" :title="$t('application.leaveApplication')" :safeAreaInsetTop="false"
 			:height="customBar+'px'">
 			<view class="u-nav-slot" v-show="detail.workflowApproveStatus!=2" slot="right"
 				@click="showCancelPopup=true">
@@ -10,7 +10,7 @@
 		<view class="content" :style="{marginTop:customBar+'px'}">
 			<view class="item-flex">
 				<view class="item-title">
-					Applay Date:
+					{{$t('application.applyDate')}}:
 				</view>
 				<view class="item-row">
 					{{detail.applyDate}}
@@ -18,7 +18,7 @@
 			</view>
 			<view class="item-flex">
 				<view class="item-title">
-					Applay Number:
+					{{$t('application.applyNumber')}}:
 				</view>
 				<view class="item-row">
 					{{detail.leaveNo}}
@@ -26,7 +26,7 @@
 			</view>
 			<view class="item-flex">
 				<view class="item-title">
-					Leave Date:
+					{{$t('application.leaveDate')}}:
 				</view>
 				<view class="item-row">
 					{{$u.timeFormat(new Date(detail.startTimestamp).getTime())}}
@@ -36,7 +36,7 @@
 			</view>
 			<view class="item-flex">
 				<view class="item-title">
-					Leave Type:
+					{{$t('application.LeaveType')}}:
 				</view>
 				<view class="item-row">
 					{{detail.typeName}}
@@ -44,7 +44,7 @@
 			</view>
 			<view class="item-flex">
 				<view class="item-title">
-					Total Leave Hours:
+					{{$t('application.totalLeaveHours')}}:
 				</view>
 				<view class="item-row">
 					{{detail.totalHours}}
@@ -52,7 +52,7 @@
 			</view>
 			<view class="item-flex">
 				<view class="item-title">
-					Comments:
+					{{$t('application.comments')}}:
 				</view>
 				<view class="item-row">
 					{{detail.reason}}
@@ -60,14 +60,14 @@
 			</view>
 			<view class="leave-details">
 				<view class="title">
-					Leave Details
+					{{$t('application.leaveDetails')}}
 				</view>
 				<view class="leave-table">
 					<view class="table-head table-column">
-						<view class="column-item">Date</view>
-						<view class="column-item">Start Time</view>
-						<view class="column-item">End Time</view>
-						<view class="column-item">Leave Hours</view>
+						<view class="column-item">{{$t('application.date')}}</view>
+						<view class="column-item">{{$t('application.startTime')}}</view>
+						<view class="column-item">{{$t('application.endTime')}}</view>
+						<view class="column-item">{{$t('application.leaveHours')}}</view>
 					</view>
 					<view class="table-column" v-for="(item,index) in detail.detailList" :key="index">
 						<view class="column-item">
@@ -81,7 +81,7 @@
 			</view>
 			<view class="flow-box">
 				<view class="flow-title">
-					Approval History
+					{{$t('application.approvalHistory')}}
 				</view>
 				<view class="flow-row">
 					<u-steps :current="3" direction="column" :dot="true" activeColor="#c8d7e6" inactiveColor="#004c97">
